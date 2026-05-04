@@ -1,108 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="SecOps engineer building security tools, automating incident response, and delivering customer-facing risk enablement." />
-  <meta name="referrer" content="no-referrer">
-  <title>SecOps Portfolio - Olaleye</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.cdnfonts.com/css/roba" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="SecOps Engineer Portfolio - Olaleye | Security Operations & AI-Driven Defense">
+  <title>Olaleye • SecOps Engineer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-
-  <!-- Tech Background Canvas -->
-  <div class="tech-bg">
-    <canvas id="techCanvas"></canvas>
-    <div class="tech-overlay"></div>
-  </div>
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">
-        <span class="brand-name">Olaleye</span>
-        <span class="brand-tag">SecOps Engineer</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="works.html">Portfolio</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="contact.html">Contact</a>
-          </li>
-        </ul>
-
-      </div>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-label="Toggle navigation">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn" title="Light mode"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn" title="Dark mode"><i class="fas fa-moon"></i></button>
+          </div>
+        </li>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 
 <!-- Hero Section -->
-  <main>
-    <section class="hero-section d-flex align-items-center min-vh-100 text-center">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-6">
-            <h1 class="hero-title display-4 fw-bold mb-3">SecOps Engineer</h1>
-            <p class="hero-tagline lead mb-4">
-              I build security tools for large and small enterprises that automate <span class="highlight">detection, response, and resilience</span> — You build, I protect.
-            </p>
-             
-              <div class="hero-stats row g-3 mb-4">
-                <div class="col-md-4">
-            <div class="stat-item p-3 rounded">
-              <div class="stat-icon">🛡️</div>
-              <div class="stat-text" data-count="50">Automated 0+ Incidents</div>
+<section id="home" class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="hero-badge"><i class="fas fa-shield-alt me-1"></i> SECOPS · DEFENSE · AI</div>
+        <h1 class="hero-title mb-3">SecOps Engineer & <span class="highlight-text">Threat Hunter</span></h1>
+        <p class="lead text-muted-light mb-4">Building resilient security pipelines, AI-driven detection, and automated incident response. Protecting digital ecosystems at scale.</p>
+        <div class="d-flex flex-wrap gap-3 mt-3">
+          <a href="#projects" class="btn btn-soft-primary"><i class="fas fa-arrow-right me-2"></i>Explore work</a>
+          <a href="#contact" class="btn btn-outline-accent"><i class="fas fa-paper-plane me-2"></i>Get in touch</a>
+        </div>
+        <div class="row mt-5 g-3">
+          <div class="col-sm-4 col-6">
+            <div class="stat-card text-center">
+              <div class="metric-number" data-count="5">2+</div>
+              <div class="small fw-semibold">Years SecOps</div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="stat-item p-3 rounded">
-              <div class="stat-icon">⚡</div>
-              <div class="stat-text" data-count="98">0% SLA Compliance</div>
+          <div class="col-sm-4 col-6">
+            <div class="stat-card text-center">
+              <div class="metric-number" data-count="99">99.9%</div>
+              <div class="small fw-semibold">Threat Coverage</div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="stat-item p-3 rounded">
-              <div class="stat-icon">📉</div>
-              <div class="stat-text" data-count="22">0% Faster MTTR</div>
+          <div class="col-sm-4 col-6">
+            <div class="stat-card text-center">
+              <div class="metric-number" data-count="50">50+</div>
+              <div class="small fw-semibold">IR Playbooks</div>
             </div>
-                </div>
-              </div>
-
-              <p class="mb-4">Better tools. Better visibility. Stronger security.</p>
-
-              <div class="explore-btn-wrapper mt-4">
-                <a href="works.html" class="btn btn-primary btn-lg explore-btn">
-                  <img src="icons/infosec/shield.svg" alt="shield" width="24" height="24" class="me-2">
-                  Explore Portfolio
-                </a>
-              </div>
           </div>
         </div>
       </div>
-    </section>
-  </main>
-
-  <footer class="site-footer py-4">
-    <div class="container text-center">
-      <span class="text-muted">© 2026 Olaleye</span>
+      <div class="col-lg-5 text-center">
+        <div class="position-relative">
+          <div class="icon-bg mx-auto mb-3" style="width: 110px; height: 110px; border-radius: 60px;">
+            <i class="fas fa-user-shield" style="font-size: 3.8rem; color: #ff6b35; line-height: 110px;"></i>
+          </div>
+          <h3 class="fw-bold mt-3">Olaleye</h3>
+          <p class="text-muted">SecOps Engineer | Security automation</p>
+        </div>
+      </div>
     </div>
-  </footer>
+  </div>
+</section>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="script.js"></script>
+<!-- About Section -->
+<section id="about" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="hero-badge bg-light-custom">about me</span>
+      <h2 class="display-6 fw-bold mt-2">Securing tomorrow's infrastructure, today</h2>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="about-card">
+          <p class="fs-5">I'm a SecOps Engineer passionate about bridging cybersecurity and AI/ML to stop threats before they escalate. With deep expertise in SIEM architectures, SOAR automation, and threat hunting, I design resilient defense systems for cloud-native and hybrid environments.</p>
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color:#ff6b35;"></i> <strong>Incident Response:</strong> 150+ handled incidents</li>
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color:#ff6b35;"></i> <strong>Zero Trust:</strong> ZTNA & microsegmentation</li>
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color:#ff6b35;"></i> <strong>SOAR:</strong> Custom playbooks (Python, Cortex XSOAR)</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-robot me-2" style="color:#ff6b35;"></i> <strong>AI/ML:</strong> Anomaly detection & behavioral analytics</li>
+                <li class="mb-2"><i class="fas fa-cloud-upload-alt me-2" style="color:#ff6b35;"></i> <strong>Cloud:</strong> AWS, Azure, GCP security posture</li>
+                <li class="mb-2"><i class="fas fa-code-branch me-2" style="color:#ff6b35;"></i> <strong>DevSecOps:</strong> K8s, Terraform, CI/CD pipelines</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- Skills Section -->
+<section id="skills" class="py-5 bg-light-custom">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="hero-badge bg-light-custom">core expertise</span>
+      <h2 class="display-6 fw-bold mt-2">Technical Arsenal</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="skill-card p-4 text-center h-100">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-chart-line fa-2x"></i></div>
+          <h4 class="fw-bold">SIEM & Analytics</h4>
+          <p>Splunk, Microsoft Sentinel, Elastic Stack, Sigma rules, KQL, SPL</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="skill-card p-4 text-center h-100">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-microchip fa-2x"></i></div>
+          <h4 class="fw-bold">AI-Driven Defense</h4>
+          <p>Python, TensorFlow, Isolation Forest, autoencoders for anomaly detection</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="skill-card p-4 text-center h-100">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-dharmachakra fa-2x"></i></div>
+          <h4 class="fw-bold">DevOps & Cloud</h4>
+          <p>Docker, K8s, Terraform, AWS Security Hub, Azure Defender, CI/CD</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="skill-card p-4 text-center h-100">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-shield-virus fa-2x"></i></div>
+          <h4 class="fw-bold">Threat Hunting</h4>
+          <p>YARA, Velociraptor, OSQuery, MITRE ATT&CK mapping, proactive hunts</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="skill-card p-4 text-center h-100">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-network-wired fa-2x"></i></div>
+          <h4 class="fw-bold">SOAR Automation</h4>
+          <p>Playbooks, API integrations, automated triage, Tines, Phantom</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="skill-card p-4 text-center h-100">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-key fa-2x"></i></div>
+          <h4 class="fw-bold">Identity & ZTNA</h4>
+          <p>Zero Trust, Okta, Azure AD, IAM policies, beyondcorp principles</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects Section -->
+<section id="projects" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="hero-badge bg-light-custom">security engineering</span>
+      <h2 class="display-6 fw-bold mt-2">Featured Projects</h2>
+      <p class="text-muted">Real-world SecOps solutions blending automation, AI, and observability</p>
+    </div>
+    <div class="row g-4">
+      
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card p-4 h-100 text-center">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-tachometer-alt fa-2x"></i></div>
+          <h3 class="h4 fw-bold">SIEM Dashboard</h3>
+          <p class="text-muted">Real-time security monitoring with AI correlation</p>
+          <a href="siem-dashboard.html" class="btn btn-soft-primary mt-2">View Project →</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card p-4 h-100 text-center">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-brain fa-2x"></i></div>
+          <h3 class="h4 fw-bold">Threat Hunting Engine</h3>
+          <p class="text-muted">AI-powered anomaly detection</p>
+          <a href="threat-hunting.html" class="btn btn-soft-primary mt-2">View Project →</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card p-4 h-100 text-center">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-robot fa-2x"></i></div>
+          <h3 class="h4 fw-bold">SOAR Platform</h3>
+          <p class="text-muted">Automated incident response</p>
+          <a href="soar-platform.html" class="btn btn-soft-primary mt-2">View Project →</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card p-4 h-100 text-center">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-clipboard-list fa-2x"></i></div>
+          <h3 class="h4 fw-bold">Compliance Suite</h3>
+          <p class="text-muted">SOC 2, ISO 27001, GDPR</p>
+          <a href="compliance-suite.html" class="btn btn-soft-primary mt-2">View Project →</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card p-4 h-100 text-center">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-shield-virus fa-2x"></i></div>
+          <h3 class="h4 fw-bold">Zero Trust Gateway</h3>
+          <p class="text-muted">Identity-based access control</p>
+          <a href="ztna-gateway.html" class="btn btn-soft-primary mt-2">View Project →</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card p-4 h-100 text-center">
+          <div class="icon-bg mx-auto mb-3"><i class="fas fa-chart-line fa-2x"></i></div>
+          <h3 class="h4 fw-bold">Threat Analysis</h3>
+          <p class="text-muted">MITRE ATT&CK intelligence</p>
+          <a href="threat-hunting-details.html" class="btn btn-soft-primary mt-2">View Project →</a>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+<!-- Contact Section with Social Icons BELOW send button -->
+<section id="contact" class="py-5 bg-light-custom">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center mb-4">
+        <span class="hero-badge">get in touch</span>
+        <h2 class="display-6 fw-bold mt-2">Secure your future with me</h2>
+        <p class="text-muted">Whether it's a security audit, consulting, or just a chat about threat intel — I'll reply within 24h.</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="about-card p-4">
+          <form id="contactForm">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Full name</label>
+              <input type="text" class="form-control" id="nameInput" placeholder="Alex Rivera" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Email address</label>
+              <input type="email" class="form-control" id="emailInput" placeholder="hello@domain.com" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Message / Inquiry</label>
+              <textarea class="form-control" rows="3" id="msgInput" placeholder="Talk about SIEM architecture, threat hunting collaboration..."></textarea>
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-soft-primary px-5 py-2 rounded-pill"><i class="fas fa-paper-plane me-2"></i>Send message</button>
+            </div>
+            <div id="formFeedback" class="mt-3 text-center small fw-semibold"></div>
+          </form>
+
+          <!-- Social Media Icons - Below send message button -->
+          <div class="social-icons-container mt-4 pt-3">
+            <hr class="mb-4">
+            <div class="d-flex justify-content-center gap-4 flex-wrap">
+              <a href="https://github.com/olaleye" target="_blank" class="social-icon-link" aria-label="GitHub">
+                <i class="fab fa-github fa-2x"></i>
+                <span class="ms-2 d-none d-sm-inline">GitHub</span>
+              </a>
+              <a href="https://linkedin.com/in/olaleye" target="_blank" class="social-icon-link" aria-label="LinkedIn">
+                <i class="fab fa-linkedin fa-2x"></i>
+                <span class="ms-2 d-none d-sm-inline">LinkedIn</span>
+              </a>
+              <a href="https://twitter.com/olaleye" target="_blank" class="social-icon-link" aria-label="Twitter">
+                <i class="fab fa-twitter fa-2x"></i>
+                <span class="ms-2 d-none d-sm-inline">Twitter</span>
+              </a>
+              <a href="mailto:olaleye@secops.dev" class="social-icon-link" aria-label="Email">
+                <i class="fas fa-envelope fa-2x"></i>
+                <span class="ms-2 d-none d-sm-inline">Email</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container text-center">
+    <p class="mb-0 text-muted">&copy; 2026 Olaleye — SecOps Engineer. Built with <i class="fas fa-shield-alt text-danger"></i> resilience & AI.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

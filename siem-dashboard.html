@@ -3,331 +3,558 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Real-time SIEM dashboard with 500+ EPS processing, AI correlation, and automated threat detection for enterprise security monitoring.">
-  <title>SIEM Dashboard - Advanced Security Monitoring</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Interactive SIEM Dashboard Demo - Real-time security monitoring with AI correlation">
+  <title>SIEM Dashboard - Olaleye</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .siem-dashboard { background: var(--bg); color: var(--text); min-height: 100vh; }
-    .metric-card { background: var(--panel); border: 1px solid var(--accent-glow); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-    .alert-critical { background: rgba(220, 53, 69, 0.1); border-left: 4px solid #dc3545; }
-    .alert-high { background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; }
-    .alert-medium { background: rgba(0, 123, 255, 0.1); border-left: 4px solid #007bff; }
-    .log-entry { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 0.5rem; border-bottom: 1px solid var(--accent-glow); }
-    .log-entry:last-child { border-bottom: none; }
-    .status-online { color: #28a745; }
-    .status-offline { color: #dc3545; }
-    .realtime-indicator { display: inline-block; width: 8px; height: 8px; background: #28a745; border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .dashboard-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a1a2e 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 2rem;
+    }
+    body.dark-theme .dashboard-header {
+      background: linear-gradient(135deg, #0a0c12 0%, #0f1a24 100%);
+    }
+    .metric-card {
+      background: var(--card-bg, #ffffff);
+      border-radius: 24px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255,107,53,0.1);
+    }
+    body.dark-theme .metric-card {
+      background: #13161f;
+      border-color: rgba(255,107,53,0.2);
+    }
+    .metric-card:hover {
+      transform: translateY(-5px);
+      border-color: #ff6b35;
+      box-shadow: 0 15px 35px rgba(255,107,53,0.15);
+    }
+    .metric-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .alert-card {
+      border-radius: 12px;
+      border-left: 4px solid;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem 1rem;
+      transition: all 0.2s ease;
+    }
+    .alert-card:hover {
+      transform: translateX(5px);
+    }
+    .alert-critical { border-left-color: #dc3545; background: rgba(220, 53, 69, 0.1); }
+    .alert-high { border-left-color: #fd7e14; background: rgba(253, 126, 20, 0.1); }
+    .alert-medium { border-left-color: #17a2b8; background: rgba(23, 162, 184, 0.1); }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .logs-container {
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+    .log-entry {
+      padding: 0.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+    body.dark-theme .log-entry {
+      border-bottom-color: rgba(255,255,255,0.05);
+    }
+    .log-entry:hover {
+      background: rgba(255,107,53,0.05);
+    }
+    .realtime-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,107,53,0.15);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      color: #ff6b35;
+      font-weight: 600;
+    }
+    .back-link {
+      color: #ff6b35;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .back-link:hover {
+      color: #e55a2b;
+      transform: translateX(-3px);
+      display: inline-block;
+    }
+    .btn-investigate {
+      background: transparent;
+      border: 1px solid #ff6b35;
+      color: #ff6b35;
+      border-radius: 20px;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+    }
+    .btn-investigate:hover {
+      background: #ff6b35;
+      color: white;
+    }
+    .stat-badge {
+      background: rgba(255,107,53,0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #ff6b35;
+    }
+    canvas {
+      max-height: 250px;
+    }
   </style>
 </head>
-<body class="siem-dashboard">
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">
-        <span class="brand-name">Olaleye</span>
-        <span class="brand-tag">SecOps Tools</span>
-      </a>
-    </div>
-  </nav>
+<body>
 
-  <main class="container py-5">
-    <div class="page-header text-center mb-4">
-      <a href="works.html" class="back-link">← Back to Portfolio</a>
-      <h1 class="display-5 fw-bold mt-3 mb-3">SIEM Dashboard</h1>
-      <p class="subhead lead">Real-time Security Information and Event Management</p>
-      <div class="d-flex justify-content-center align-items-center gap-3">
-        <span class="realtime-indicator"></span>
-        <small class="text-success">LIVE MONITORING ACTIVE</small>
-        <span class="badge bg-success">500+ EPS</span>
-        <span class="badge bg-primary">99.5% Uptime</span>
-      </div>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+          </div>
+        </li>
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <!-- Metrics Row -->
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="metric-card text-center">
-          <h3 class="text-primary mb-2" id="events-count">1,247</h3>
-          <p class="mb-0">Events Today</p>
-          <small class="text-muted">+12% from yesterday</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric-card text-center">
-          <h3 class="text-danger mb-2" id="alerts-count">23</h3>
-          <p class="mb-0">Active Alerts</p>
-          <small class="text-muted">5 critical, 12 high, 6 medium</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric-card text-center">
-          <h3 class="text-warning mb-2" id="threats-count">8</h3>
-          <p class="mb-0">Threats Detected</p>
-          <small class="text-muted">3 blocked, 5 contained</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric-card text-center">
-          <h3 class="text-success mb-2" id="uptime">99.7%</h3>
-          <p class="mb-0">System Uptime</p>
-          <small class="text-muted">24h rolling average</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="row mb-4">
+<!-- Header -->
+<section class="dashboard-header">
+  <div class="container">
+    <div class="row align-items-center">
       <div class="col-lg-8">
-        <div class="metric-card">
-          <h5 class="mb-3">Events Timeline (Last 24 Hours)</h5>
-          <canvas id="eventsChart" height="200"></canvas>
+        <div class="realtime-badge mb-3">
+          <span class="pulse" style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
+          LIVE MONITORING ACTIVE
+        </div>
+        <h1 class="display-4 fw-bold mb-3">SIEM Dashboard</h1>
+        <p class="lead mb-4">Real-time security monitoring with AI-powered threat correlation</p>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span class="stat-badge"><i class="fas fa-tachometer-alt me-1"></i> 500+ EPS</span>
+          <span class="stat-badge"><i class="fas fa-chart-line me-1"></i> 99.5% Uptime</span>
+          <span class="stat-badge"><i class="fas fa-robot me-1"></i> AI Correlation Active</span>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="metric-card">
-          <h5 class="mb-3">Alert Distribution</h5>
-          <canvas id="alertsChart" height="200"></canvas>
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="index.html#projects" class="btn btn-outline-accent">
+          <i class="fas fa-arrow-left me-2"></i>Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-4">
+  <!-- Metrics Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="metric-card text-center">
+        <i class="fas fa-database fa-2x mb-2" style="color: #ff6b35;"></i>
+        <div class="metric-number" id="events-count">1,247</div>
+        <p class="mb-0 fw-semibold">Events Today</p>
+        <small class="text-muted">+12% from yesterday</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="metric-card text-center">
+        <i class="fas fa-exclamation-triangle fa-2x mb-2" style="color: #dc3545;"></i>
+        <div class="metric-number text-danger" id="alerts-count">23</div>
+        <p class="mb-0 fw-semibold">Active Alerts</p>
+        <small class="text-muted">5 critical, 12 high, 6 medium</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="metric-card text-center">
+        <i class="fas fa-skull-crossbones fa-2x mb-2" style="color: #fd7e14;"></i>
+        <div class="metric-number" id="threats-count">8</div>
+        <p class="mb-0 fw-semibold">Threats Detected</p>
+        <small class="text-muted">3 blocked, 5 contained</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="metric-card text-center">
+        <i class="fas fa-chart-line fa-2x mb-2" style="color: #28a745;"></i>
+        <div class="metric-number text-success" id="uptime">99.7%</div>
+        <p class="mb-0 fw-semibold">System Uptime</p>
+        <small class="text-muted">24h rolling average</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="metric-card">
+        <h5 class="mb-3 fw-bold"><i class="fas fa-chart-line me-2" style="color: #ff6b35;"></i>Events Timeline (Last 24 Hours)</h5>
+        <canvas id="eventsChart" height="200"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="metric-card">
+        <h5 class="mb-3 fw-bold"><i class="fas fa-chart-pie me-2" style="color: #ff6b35;"></i>Alert Distribution</h5>
+        <canvas id="alertsChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts and Logs Row -->
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="metric-card">
+        <h5 class="mb-3 fw-bold"><i class="fas fa-bell me-2" style="color: #ff6b35;"></i>Recent Alerts</h5>
+        <div id="alerts-list" class="alerts-container">
+          <!-- Alerts will be populated by JavaScript -->
         </div>
       </div>
     </div>
-
-    <!-- Alerts and Logs Row -->
-    <div class="row">
-      <div class="col-lg-6">
-        <div class="metric-card">
-          <h5 class="mb-3">Recent Alerts</h5>
-          <div id="alerts-list" class="alerts-container">
-            <!-- Alerts will be populated by JavaScript -->
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="metric-card">
-          <h5 class="mb-3">Live Event Log</h5>
-          <div id="logs-container" class="logs-container" style="max-height: 400px; overflow-y: auto;">
-            <!-- Logs will be populated by JavaScript -->
-          </div>
+    <div class="col-lg-6">
+      <div class="metric-card">
+        <h5 class="mb-3 fw-bold"><i class="fas fa-terminal me-2" style="color: #ff6b35;"></i>Live Event Log</h5>
+        <div id="logs-container" class="logs-container">
+          <!-- Logs will be populated by JavaScript -->
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="script.js"></script>
-  <script>
-    // SIEM Dashboard JavaScript
-    class SIEMDashboard {
-      constructor() {
-        this.eventsChart = null;
-        this.alertsChart = null;
-        this.init();
+  <!-- CTA Section -->
+  <div class="cta-section mt-5 text-center p-5" style="background: linear-gradient(135deg, rgba(255,107,53,0.05), transparent); border-radius: 30px;">
+    <h3 class="fw-bold">Want to deploy this SIEM for your organization?</h3>
+    <p class="mb-4">Customizable, scalable, and AI-powered security monitoring tailored to your needs.</p>
+    <a href="index.html#contact" class="btn btn-soft-primary">Request Demo <i class="fas fa-arrow-right ms-2"></i></a>
+  </div>
+</main>
+
+<footer class="bg-dark text-white py-4 mt-5">
+  <div class="container text-center">
+    <p class="mb-0">&copy; 2026 Olaleye — SecOps Engineer. Built with <i class="fas fa-shield-alt text-danger"></i> resilience & AI.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+<script>
+  // SIEM Dashboard Class
+  class SIEMDashboard {
+    constructor() {
+      this.eventsChart = null;
+      this.alertsChart = null;
+      this.init();
+    }
+
+    init() {
+      this.initCharts();
+      this.startDataUpdates();
+      this.loadInitialData();
+      this.initThemeSync();
+    }
+
+    initThemeSync() {
+      // Watch for theme changes to update chart colors
+      const observer = new MutationObserver(() => {
+        this.updateChartColors();
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    updateChartColors() {
+      const isDark = document.body.classList.contains('dark-theme');
+      const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+      
+      if (this.eventsChart) {
+        this.eventsChart.options.scales.y.grid.color = gridColor;
+        this.eventsChart.options.scales.x.grid.color = gridColor;
+        this.eventsChart.update();
       }
+    }
 
-      init() {
-        this.initCharts();
-        this.startDataUpdates();
-        this.loadInitialData();
-      }
-
-      initCharts() {
-        // Events Timeline Chart
-        const eventsCtx = document.getElementById('eventsChart').getContext('2d');
-        this.eventsChart = new Chart(eventsCtx, {
-          type: 'line',
-          data: {
-            labels: this.generateTimeLabels(24),
-            datasets: [{
-              label: 'Security Events',
-              data: this.generateRandomData(24, 100, 500),
-              borderColor: 'rgba(255, 107, 53, 1)',
-              backgroundColor: 'rgba(255, 107, 53, 0.1)',
-              tension: 0.4,
-              fill: true
-            }]
+    initCharts() {
+      const isDark = document.body.classList.contains('dark-theme');
+      const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+      
+      // Events Timeline Chart
+      const eventsCtx = document.getElementById('eventsChart').getContext('2d');
+      this.eventsChart = new Chart(eventsCtx, {
+        type: 'line',
+        data: {
+          labels: this.generateTimeLabels(24),
+          datasets: [{
+            label: 'Security Events',
+            data: this.generateRandomData(24, 100, 500),
+            borderColor: '#ff6b35',
+            backgroundColor: 'rgba(255, 107, 53, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            pointBackgroundColor: '#ff6b35'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { mode: 'index', intersect: false }
           },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false }
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              title: { display: true, text: 'Events', color: isDark ? '#a3b3d6' : '#666' }
             },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-              },
-              x: {
-                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-              }
+            x: {
+              grid: { color: gridColor },
+              ticks: { maxRotation: 45, autoSkip: true }
             }
           }
-        });
-
-        // Alerts Distribution Chart
-        const alertsCtx = document.getElementById('alertsChart').getContext('2d');
-        this.alertsChart = new Chart(alertsCtx, {
-          type: 'doughnut',
-          data: {
-            labels: ['Critical', 'High', 'Medium', 'Low'],
-            datasets: [{
-              data: [5, 12, 6, 15],
-              backgroundColor: [
-                '#dc3545',
-                '#fd7e14',
-                '#007bff',
-                '#28a745'
-              ]
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' }
-            }
-          }
-        });
-      }
-
-      generateTimeLabels(hours) {
-        const labels = [];
-        const now = new Date();
-        for (let i = hours - 1; i >= 0; i--) {
-          const time = new Date(now.getTime() - (i * 60 * 60 * 1000));
-          labels.push(time.getHours() + ':00');
         }
-        return labels;
+      });
+
+      // Alerts Distribution Chart
+      const alertsCtx = document.getElementById('alertsChart').getContext('2d');
+      this.alertsChart = new Chart(alertsCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Critical', 'High', 'Medium', 'Low'],
+          datasets: [{
+            data: [5, 12, 6, 15],
+            backgroundColor: ['#dc3545', '#fd7e14', '#ff6b35', '#28a745'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: isDark ? '#e0e4f0' : '#333' } }
+          }
+        }
+      });
+    }
+
+    generateTimeLabels(hours) {
+      const labels = [];
+      const now = new Date();
+      for (let i = hours - 1; i >= 0; i--) {
+        const time = new Date(now.getTime() - (i * 60 * 60 * 1000));
+        labels.push(time.getHours() + ':00');
       }
+      return labels;
+    }
 
-      generateRandomData(count, min, max) {
-        return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    generateRandomData(count, min, max) {
+      return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+
+    startDataUpdates() {
+      // Update metrics every 5 seconds
+      setInterval(() => {
+        this.updateMetrics();
+        this.updateCharts();
+      }, 5000);
+
+      // Add new log entries and alerts every 3 seconds
+      setInterval(() => {
+        this.addRandomLog();
+        this.addRandomAlert();
+      }, 3000);
+    }
+
+    updateMetrics() {
+      const eventsEl = document.getElementById('events-count');
+      const alertsEl = document.getElementById('alerts-count');
+      const threatsEl = document.getElementById('threats-count');
+
+      if (eventsEl) {
+        const currentEvents = parseInt(eventsEl.textContent.replace(/,/g, ''));
+        eventsEl.textContent = (currentEvents + Math.floor(Math.random() * 15) + 5).toLocaleString();
       }
-
-      startDataUpdates() {
-        // Update metrics every 5 seconds
-        setInterval(() => {
-          this.updateMetrics();
-          this.updateCharts();
-        }, 5000);
-
-        // Add new log entries and alerts every 3 seconds
-        setInterval(() => {
-          this.addRandomLog();
-          this.addRandomAlert();
-        }, 3000);
-      }
-
-      updateMetrics() {
-        const eventsEl = document.getElementById('events-count');
-        const alertsEl = document.getElementById('alerts-count');
-        const threatsEl = document.getElementById('threats-count');
-
-        // Update events count
-        const currentEvents = parseInt(eventsEl.textContent.replace(',', ''));
-        eventsEl.textContent = (currentEvents + Math.floor(Math.random() * 10) + 1).toLocaleString();
-
-        // Update alerts count
+      if (alertsEl) {
         const currentAlerts = parseInt(alertsEl.textContent);
         alertsEl.textContent = currentAlerts + (Math.random() > 0.7 ? 1 : 0);
-
-        // Update threats count
+      }
+      if (threatsEl) {
         const currentThreats = parseInt(threatsEl.textContent);
-        threatsEl.textContent = currentThreats + (Math.random() > 0.9 ? 1 : 0);
+        threatsEl.textContent = currentThreats + (Math.random() > 0.85 ? 1 : 0);
       }
+    }
 
-      updateCharts() {
-        // Update events chart with new data point
-        if (this.eventsChart.data.datasets[0].data.length >= 24) {
-          this.eventsChart.data.datasets[0].data.shift();
-        }
-        this.eventsChart.data.datasets[0].data.push(Math.floor(Math.random() * 400) + 100);
-        this.eventsChart.update('none');
+    updateCharts() {
+      if (this.eventsChart && this.eventsChart.data.datasets[0].data.length >= 24) {
+        this.eventsChart.data.datasets[0].data.shift();
       }
+      this.eventsChart?.data.datasets[0].data.push(Math.floor(Math.random() * 400) + 100);
+      this.eventsChart?.update('none');
+    }
 
-      addRandomLog() {
-        const logsContainer = document.getElementById('logs-container');
-        const logTypes = [
-          { type: 'INFO', color: 'text-info', message: 'User login successful' },
-          { type: 'WARN', color: 'text-warning', message: 'Unusual login attempt detected' },
-          { type: 'ERROR', color: 'text-danger', message: 'Failed authentication attempt' },
-          { type: 'INFO', color: 'text-success', message: 'Security policy updated' }
-        ];
+    addRandomLog() {
+      const logsContainer = document.getElementById('logs-container');
+      if (!logsContainer) return;
 
-        const randomLog = logTypes[Math.floor(Math.random() * logTypes.length)];
+      const logTypes = [
+        { type: 'INFO', color: '#28a745', message: 'User login successful', user: 'admin@secops.local', ip: '10.0.1.45' },
+        { type: 'WARN', color: '#fd7e14', message: 'Unusual login attempt detected', user: 'unknown', ip: `185.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` },
+        { type: 'ERROR', color: '#dc3545', message: 'Failed authentication attempt', user: `user_${Math.floor(Math.random() * 100)}`, ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` },
+        { type: 'ALERT', color: '#ff6b35', message: 'Suspicious process execution detected', user: 'SYSTEM', ip: '127.0.0.1' }
+      ];
+
+      const randomLog = logTypes[Math.floor(Math.random() * logTypes.length)];
+      const timestamp = new Date().toLocaleTimeString();
+      const logId = `LOG-${Math.floor(Math.random() * 10000)}`;
+
+      const logEntry = document.createElement('div');
+      logEntry.className = 'log-entry d-flex flex-wrap gap-2 align-items-start';
+      logEntry.innerHTML = `
+        <span class="text-muted" style="font-size: 0.7rem;">[${timestamp}]</span>
+        <span style="color: ${randomLog.color}; font-weight: 600;">[${randomLog.type}]</span>
+        <span>${randomLog.message}</span>
+        <span class="text-muted ms-auto">${randomLog.user} @ ${randomLog.ip}</span>
+      `;
+
+      logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+
+      while (logsContainer.children.length > 25) {
+        logsContainer.removeChild(logsContainer.lastChild);
+      }
+    }
+
+    addRandomAlert() {
+      const alertsContainer = document.getElementById('alerts-list');
+      if (!alertsContainer) return;
+
+      const alertTypes = [
+        { level: 'critical', title: '🚨 Brute Force Attack Detected', message: 'Multiple failed login attempts from single IP', severity: 'Critical' },
+        { level: 'high', title: '⚠️ Suspicious File Access', message: 'Unauthorized access to sensitive files detected', severity: 'High' },
+        { level: 'medium', title: '📊 Unusual Network Traffic', message: 'Abnormal data transfer patterns observed', severity: 'Medium' },
+        { level: 'critical', title: '💀 Malware Signature Match', message: 'Known malware pattern identified in memory', severity: 'Critical' }
+      ];
+
+      if (Math.random() > 0.65) {
+        const randomAlert = alertTypes[Math.floor(Math.random() * alertTypes.length)];
         const timestamp = new Date().toLocaleTimeString();
-        const sourceIP = `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+        const sourceIP = `10.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
 
-        const logEntry = document.createElement('div');
-        logEntry.className = 'log-entry';
-        logEntry.innerHTML = `
-          <span class="text-muted">${timestamp}</span>
-          <span class="${randomLog.color}">[${randomLog.type}]</span>
-          <span>${randomLog.message} from ${sourceIP}</span>
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert-card alert-${randomAlert.level}`;
+        alertDiv.innerHTML = `
+          <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+            <div class="flex-grow-1">
+              <strong>${randomAlert.title}</strong>
+              <br><small class="text-muted">${randomAlert.message}</small>
+              <br><small class="text-muted"><i class="fas fa-clock me-1"></i>${timestamp} · Source: ${sourceIP}</small>
+            </div>
+            <button class="btn-investigate" onclick="alert('Investigating ${randomAlert.title}...')">
+              <i class="fas fa-search me-1"></i>Investigate
+            </button>
+          </div>
         `;
 
-        logsContainer.appendChild(logEntry);
+        alertsContainer.insertBefore(alertDiv, alertsContainer.firstChild);
 
-        // Keep only last 20 entries
-        while (logsContainer.children.length > 20) {
-          logsContainer.removeChild(logsContainer.firstChild);
-        }
-
-        logsContainer.scrollTop = logsContainer.scrollHeight;
-      }
-
-      addRandomAlert() {
-        const alertsContainer = document.getElementById('alerts-list');
-        const alertTypes = [
-          { level: 'critical', title: 'Brute Force Attack Detected', message: 'Multiple failed login attempts from single IP', icon: '🚨' },
-          { level: 'high', title: 'Suspicious File Access', message: 'Unauthorized access to sensitive files detected', icon: '⚠️' },
-          { level: 'medium', title: 'Unusual Network Traffic', message: 'Abnormal data transfer patterns observed', icon: '📊' }
-        ];
-
-        // Only add alert 30% of the time
-        if (Math.random() > 0.7) {
-          const randomAlert = alertTypes[Math.floor(Math.random() * alertTypes.length)];
-          const timestamp = new Date().toLocaleTimeString();
-
-          const alertDiv = document.createElement('div');
-          alertDiv.className = `alert alert-${randomAlert.level} mb-2`;
-          alertDiv.innerHTML = `
-            <div class="d-flex align-items-start">
-              <div class="me-2">${randomAlert.icon}</div>
-              <div class="flex-grow-1">
-                <strong>${randomAlert.title}</strong>
-                <br><small class="text-muted">${randomAlert.message}</small>
-                <br><small class="text-muted">${timestamp}</small>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary ms-2">Investigate</button>
-            </div>
-          `;
-
-          alertsContainer.insertBefore(alertDiv, alertsContainer.firstChild);
-
-          // Keep only last 10 alerts
-          while (alertsContainer.children.length > 10) {
-            alertsContainer.removeChild(alertsContainer.lastChild);
-          }
-        }
-      }
-
-      loadInitialData() {
-        // Add some initial logs and alerts
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => this.addRandomLog(), i * 200);
-          setTimeout(() => this.addRandomAlert(), i * 500);
+        while (alertsContainer.children.length > 12) {
+          alertsContainer.removeChild(alertsContainer.lastChild);
         }
       }
     }
 
-    // Initialize dashboard when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      new SIEMDashboard();
+    loadInitialData() {
+      for (let i = 0; i < 8; i++) {
+        setTimeout(() => this.addRandomLog(), i * 150);
+        setTimeout(() => this.addRandomAlert(), i * 400);
+      }
+    }
+  }
+
+  // Theme management
+  function initTheme() {
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('secops_theme', 'dark');
+        darkBtn?.classList.add('active');
+        lightBtn?.classList.remove('active');
+      } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('secops_theme', 'light');
+        lightBtn?.classList.add('active');
+        darkBtn?.classList.remove('active');
+      }
+    };
+
+    const savedTheme = localStorage.getItem('secops_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+
+    const lightBtn = document.getElementById('lightModeBtn');
+    const darkBtn = document.getElementById('darkModeBtn');
+    if (lightBtn) lightBtn.addEventListener('click', () => setTheme('light'));
+    if (darkBtn) darkBtn.addEventListener('click', () => setTheme('dark'));
+  }
+
+  // Smooth scroll and nav active
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && href.includes('#') && href !== '#') {
+        e.preventDefault();
+        const targetId = href.split('#')[1];
+        const target = document.getElementById(targetId);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      }
     });
+  });
 
-
-  </script>
+  // Initialize everything
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    new SIEMDashboard();
+  });
+</script>
 </body>
 </html>

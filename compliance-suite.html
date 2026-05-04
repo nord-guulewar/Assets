@@ -3,475 +3,644 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Compliance automation suite demo supporting SOC 2, ISO 27001, GDPR with continuous assessment and automated evidence collection.">
-  <title>Compliance Automation Suite - Demo</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Compliance Automation Suite - SOC 2, ISO 27001, GDPR compliance with continuous monitoring and automated evidence collection">
+  <title>Compliance Suite | Olaleye SecOps</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .compliance-demo { background: var(--bg); color: var(--text); min-height: 100vh; }
-    .compliance-card { background: var(--panel); border: 1px solid var(--accent-glow); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-    .framework-status { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 0.5rem; }
-    .status-compliant { background: #28a745; }
-    .status-partial { background: #ffc107; }
-    .status-non-compliant { background: #dc3545; }
-    .control-item { background: rgba(20, 20, 20, 0.5); border: 1px solid rgba(255, 107, 53, 0.2); border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; }
-    .control-compliant { border-color: #28a745; background: rgba(40, 167, 69, 0.1); }
-    .control-failed { border-color: #dc3545; background: rgba(220, 53, 69, 0.1); }
-    .demo-banner { background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(40, 167, 69, 0.1)); border: 1px solid rgba(0, 123, 255, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
-    .metric-ring { width: 80px; height: 80px; border-radius: 50%; display: inline-block; position: relative; margin: 0.5rem; }
-    .metric-ring::before { content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border-radius: 50%; background: var(--bg); }
+    .compliance-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a1a2e 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 2rem;
+    }
+    body.dark-theme .compliance-header {
+      background: linear-gradient(135deg, #0a0c12 0%, #0f1a24 100%);
+    }
+    .compliance-card {
+      background: var(--card-bg, #ffffff);
+      border: 1px solid rgba(255,107,53,0.15);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .compliance-card {
+      background: #13161f;
+    }
+    .compliance-card:hover {
+      border-color: rgba(255,107,53,0.3);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+    .framework-status {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+    .status-compliant { background: #28a745; box-shadow: 0 0 8px rgba(40, 167, 69, 0.5); }
+    .status-partial { background: #ffc107; box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
+    .status-non-compliant { background: #dc3545; box-shadow: 0 0 8px rgba(220, 53, 69, 0.5); }
+    .control-item {
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(255,107,53,0.15);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s ease;
+    }
+    body.dark-theme .control-item {
+      background: rgba(255,255,255,0.03);
+    }
+    .control-item:hover {
+      transform: translateX(5px);
+      border-color: rgba(255,107,53,0.3);
+    }
+    .control-compliant { border-left: 3px solid #28a745; }
+    .control-failed { border-left: 3px solid #dc3545; }
+    .control-warning { border-left: 3px solid #ffc107; }
+    .demo-banner {
+      background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(40, 167, 69, 0.05));
+      border: 1px solid rgba(255,107,53,0.2);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .metric-ring {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      position: relative;
+    }
+    .metric-ring-inner {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--card-bg, #fff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    body.dark-theme .metric-ring-inner {
+      background: #13161f;
+    }
+    .stat-badge {
+      background: rgba(255,107,53,0.12);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ff6b35;
+    }
+    .btn-action {
+      background: transparent;
+      border: 1px solid #ff6b35;
+      color: #ff6b35;
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-action:hover {
+      background: #ff6b35;
+      color: white;
+    }
+    .progress-custom {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,107,53,0.1);
+    }
+    .progress-custom-bar {
+      background: #ff6b35;
+      border-radius: 3px;
+    }
+    .audit-table-wrapper {
+      overflow-x: auto;
+    }
+    .audit-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .audit-table th,
+    .audit-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    body.dark-theme .audit-table th,
+    body.dark-theme .audit-table td {
+      border-bottom-color: rgba(255,255,255,0.05);
+    }
+    .audit-table tr:hover {
+      background: rgba(255,107,53,0.03);
+    }
+    .framework-progress {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,107,53,0.1);
+      margin: 0.5rem 0;
+    }
+    .framework-progress-bar {
+      background: #ff6b35;
+      border-radius: 3px;
+      height: 100%;
+    }
   </style>
 </head>
-<body class="compliance-demo">
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">
-        <span class="brand-name">Olaleye</span>
-        <span class="brand-tag">SecOps Tools</span>
-      </a>
-    </div>
-  </nav>
+<body>
 
-  <main class="container py-5">
-    <div class="page-header text-center mb-4">
-      <a href="works.html" class="back-link">← Back to Portfolio</a>
-      <h1 class="display-5 fw-bold mt-3 mb-3">Compliance Automation Suite</h1>
-      <p class="subhead lead">Automated Compliance Monitoring & Reporting Demo</p>
-      <div class="demo-banner">
-        <h6 class="text-primary mb-2">📋 LIVE COMPLIANCE DASHBOARD</h6>
-        <p class="mb-0">Experience real-time compliance monitoring across multiple frameworks. Run automated assessments and generate audit reports!</p>
-      </div>
-    </div>
-
-    <!-- Compliance Overview -->
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="compliance-card text-center">
-          <div class="metric-ring mx-auto" style="background: conic-gradient(#28a745 0% 87%, #dc3545 87% 100%)">
-            <div class="position-absolute top-50 start-50 translate-middle fw-bold">87%</div>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
           </div>
-          <h5 class="mt-2">Overall Score</h5>
-          <small class="text-muted">8 frameworks monitored</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="compliance-card text-center">
-          <div class="fs-2 text-success mb-2">✓</div>
-          <h5>6 Compliant</h5>
-          <small class="text-muted">Frameworks passing</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="compliance-card text-center">
-          <div class="fs-2 text-warning mb-2">⚠️</div>
-          <h5>2 Partial</h5>
-          <small class="text-muted">Needs attention</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="compliance-card text-center">
-          <div class="fs-2 text-danger mb-2">✗</div>
-          <h5>0 Failed</h5>
-          <small class="text-muted">Critical issues</small>
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <!-- Framework Status -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="compliance-card">
-          <h5 class="mb-3">Compliance Framework Status</h5>
-          <div class="row" id="frameworks-grid">
-            <!-- Frameworks will be populated by JavaScript -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Controls Assessment -->
-    <div class="row mb-4">
+<!-- Header -->
+<section class="compliance-header">
+  <div class="container">
+    <div class="row align-items-center">
       <div class="col-lg-8">
-        <div class="compliance-card">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Recent Control Assessments</h5>
-            <button class="btn btn-primary btn-sm" onclick="runAssessment()">Run New Assessment</button>
-          </div>
-          <div id="controls-list" class="controls-container" style="max-height: 400px; overflow-y: auto;">
-            <!-- Controls will be populated by JavaScript -->
-          </div>
+        <div class="stat-badge mb-3 d-inline-flex align-items-center gap-2">
+          <i class="fas fa-clipboard-list me-1"></i> LIVE COMPLIANCE DASHBOARD
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Compliance Automation Suite</h1>
+        <p class="lead mb-4">Automated Compliance Monitoring & Reporting across SOC 2, ISO 27001, GDPR, and more</p>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span class="stat-badge"><i class="fas fa-check-circle me-1"></i> 8 Frameworks</span>
+          <span class="stat-badge"><i class="fas fa-chart-line me-1"></i> Continuous Monitoring</span>
+          <span class="stat-badge"><i class="fas fa-file-alt me-1"></i> Auto-evidence Collection</span>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="compliance-card">
-          <h5 class="mb-3">Compliance Trends</h5>
-          <canvas id="complianceChart" height="200"></canvas>
-        </div>
-        <div class="compliance-card mt-3">
-          <h5 class="mb-3">Quick Actions</h5>
-          <div class="d-grid gap-2">
-            <button class="btn btn-outline-primary btn-sm" onclick="generateReport()">Generate Audit Report</button>
-            <button class="btn btn-outline-success btn-sm" onclick="scheduleAssessment()">Schedule Assessment</button>
-            <button class="btn btn-outline-warning btn-sm" onclick="configureAlerts()">Configure Alerts</button>
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="index.html#projects" class="btn btn-outline-accent">
+          <i class="fas fa-arrow-left me-2"></i>Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-4">
+  <!-- Demo Banner -->
+  <div class="demo-banner text-center">
+    <i class="fas fa-robot fa-2x mb-2" style="color: #ff6b35;"></i>
+    <h6 class="fw-bold mb-2">Interactive Demo Mode</h6>
+    <p class="mb-0 small">Experience real-time compliance monitoring across multiple frameworks. Run automated assessments and generate audit reports!</p>
+  </div>
+
+  <!-- Compliance Overview Metrics -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="compliance-card text-center">
+        <div class="metric-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,107,53,0.1)" stroke-width="8"/>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#ff6b35" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="37" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="metric-ring-inner position-absolute">
+            <span class="fw-bold fs-3" style="color: #ff6b35;">87%</span>
           </div>
+        </div>
+        <h6 class="mt-2 fw-bold">Overall Score</h6>
+        <small class="text-muted">8 frameworks monitored</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="compliance-card text-center">
+        <i class="fas fa-check-circle fa-3x mb-2" style="color: #28a745;"></i>
+        <h3 class="fw-bold text-success mb-0">6</h3>
+        <p class="mb-0 fw-semibold">Compliant</p>
+        <small class="text-muted">Frameworks passing</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="compliance-card text-center">
+        <i class="fas fa-exclamation-triangle fa-3x mb-2" style="color: #ffc107;"></i>
+        <h3 class="fw-bold text-warning mb-0">2</h3>
+        <p class="mb-0 fw-semibold">Partial</p>
+        <small class="text-muted">Needs attention</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="compliance-card text-center">
+        <i class="fas fa-times-circle fa-3x mb-2" style="color: #28a745;"></i>
+        <h3 class="fw-bold text-success mb-0">0</h3>
+        <p class="mb-0 fw-semibold">Failed</p>
+        <small class="text-muted">Critical issues</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Framework Status -->
+  <div class="compliance-card mb-4">
+    <h5 class="fw-bold mb-3"><i class="fas fa-building me-2" style="color: #ff6b35;"></i>Compliance Framework Status</h5>
+    <div class="row g-3" id="frameworks-grid">
+      <!-- Frameworks will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Controls Assessment & Compliance Trends -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="compliance-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h5 class="fw-bold mb-0"><i class="fas fa-shield-alt me-2" style="color: #ff6b35;"></i>Recent Control Assessments</h5>
+          <button class="btn btn-soft-primary btn-sm" onclick="runAssessment()">
+            <i class="fas fa-play me-1"></i>Run Assessment
+          </button>
+        </div>
+        <div id="controls-list" class="controls-container" style="max-height: 400px; overflow-y: auto;">
+          <!-- Controls will be populated by JavaScript -->
         </div>
       </div>
     </div>
-
-    <!-- Audit Trail -->
-    <div class="row">
-      <div class="col-12">
-        <div class="compliance-card">
-          <h5 class="mb-3">Audit Trail & Evidence Collection</h5>
-          <div class="table-responsive">
-            <table class="table table-dark table-striped">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>Action</th>
-                  <th>Framework</th>
-                  <th>Status</th>
-                  <th>Evidence</th>
-                </tr>
-              </thead>
-              <tbody id="audit-table">
-                <!-- Audit entries will be populated by JavaScript -->
-              </tbody>
-            </table>
-          </div>
+    <div class="col-lg-5">
+      <div class="compliance-card">
+        <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2" style="color: #ff6b35;"></i>Compliance Trends</h5>
+        <canvas id="complianceChart" height="200"></canvas>
+      </div>
+      <div class="compliance-card mt-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-bolt me-2" style="color: #ff6b35;"></i>Quick Actions</h5>
+        <div class="d-grid gap-2">
+          <button class="btn-action" onclick="generateReport()"><i class="fas fa-file-pdf me-2"></i>Generate Audit Report</button>
+          <button class="btn-action" onclick="scheduleAssessment()"><i class="fas fa-calendar me-2"></i>Schedule Assessment</button>
+          <button class="btn-action" onclick="configureAlerts()"><i class="fas fa-bell me-2"></i>Configure Alerts</button>
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script>
-    // Compliance Automation Suite Demo JavaScript
-    class ComplianceDemo {
-      constructor() {
-        this.frameworks = [];
-        this.controls = [];
-        this.auditTrail = [];
-        this.init();
-      }
+  <!-- Audit Trail -->
+  <div class="compliance-card">
+    <h5 class="fw-bold mb-3"><i class="fas fa-history me-2" style="color: #ff6b35;"></i>Audit Trail & Evidence Collection</h5>
+    <div class="audit-table-wrapper">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Framework</th>
+            <th>Status</th>
+            <th>Evidence</th>
+          </tr>
+        </thead>
+        <tbody id="audit-table">
+          <!-- Audit entries will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-      init() {
-        this.loadFrameworks();
-        this.loadControls();
-        this.initCharts();
-        this.startPeriodicUpdates();
-        this.populateAuditTrail();
-      }
+  <!-- CTA Section -->
+  <div class="cta-section mt-4 text-center p-5" style="background: linear-gradient(135deg, rgba(255,107,53,0.05), transparent); border-radius: 30px;">
+    <h3 class="fw-bold">Ready to automate your compliance journey?</h3>
+    <p class="mb-4">Reduce audit preparation time by 80% with continuous compliance monitoring.</p>
+    <a href="index.html#contact" class="btn btn-soft-primary">Request Demo <i class="fas fa-arrow-right ms-2"></i></a>
+  </div>
+</main>
 
-      loadFrameworks() {
-        this.frameworks = [
-          { name: 'SOC 2', status: 'compliant', score: 95, lastAssessment: '2024-01-15', controls: 45 },
-          { name: 'ISO 27001', status: 'compliant', score: 92, lastAssessment: '2024-01-14', controls: 38 },
-          { name: 'NIST CSF', status: 'partial', score: 78, lastAssessment: '2024-01-13', controls: 52 },
-          { name: 'GDPR', status: 'compliant', score: 88, lastAssessment: '2024-01-12', controls: 29 },
-          { name: 'PCI DSS', status: 'compliant', score: 91, lastAssessment: '2024-01-11', controls: 33 },
-          { name: 'HIPAA', status: 'compliant', score: 94, lastAssessment: '2024-01-10', controls: 27 },
-          { name: 'CIS Controls', status: 'partial', score: 82, lastAssessment: '2024-01-09', controls: 41 },
-          { name: 'FedRAMP', status: 'compliant', score: 89, lastAssessment: '2024-01-08', controls: 36 }
-        ];
+<footer>
+  <div class="container text-center">
+    <p class="mb-0 text-muted">&copy; 2026 Olaleye — SecOps Engineer. Built with <i class="fas fa-shield-alt text-danger"></i> resilience & AI.</p>
+  </div>
+</footer>
 
-        this.renderFrameworks();
-      }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+<script>
+  // Compliance Automation Suite Demo
+  class ComplianceDemo {
+    constructor() {
+      this.frameworks = [];
+      this.controls = [];
+      this.auditTrail = [];
+      this.complianceChart = null;
+      this.init();
+    }
 
-      renderFrameworks() {
-        const grid = document.getElementById('frameworks-grid');
-        grid.innerHTML = '';
+    init() {
+      this.loadFrameworks();
+      this.loadControls();
+      this.initCharts();
+      this.startPeriodicUpdates();
+      this.populateAuditTrail();
+    }
 
-        this.frameworks.forEach(framework => {
-          const statusClass = {
-            'compliant': 'status-compliant',
-            'partial': 'status-partial',
-            'non-compliant': 'status-non-compliant'
-          }[framework.status];
+    loadFrameworks() {
+      this.frameworks = [
+        { name: 'SOC 2', status: 'compliant', score: 95, controls: 45, icon: 'fa-shield' },
+        { name: 'ISO 27001', status: 'compliant', score: 92, controls: 38, icon: 'fa-globe' },
+        { name: 'NIST CSF', status: 'partial', score: 78, controls: 52, icon: 'fa-building' },
+        { name: 'GDPR', status: 'compliant', score: 88, controls: 29, icon: 'fa-euro-sign' },
+        { name: 'PCI DSS', status: 'compliant', score: 91, controls: 33, icon: 'fa-credit-card' },
+        { name: 'HIPAA', status: 'compliant', score: 94, controls: 27, icon: 'fa-hospital' },
+        { name: 'CIS Controls', status: 'partial', score: 82, controls: 41, icon: 'fa-check-double' },
+        { name: 'FedRAMP', status: 'compliant', score: 89, controls: 36, icon: 'fa-cloud' }
+      ];
+      this.renderFrameworks();
+    }
 
-          const col = document.createElement('div');
-          col.className = 'col-md-3 mb-3';
-          col.innerHTML = `
-            <div class="text-center">
-              <div class="framework-status ${statusClass}"></div>
-              <h6 class="mb-1">${framework.name}</h6>
-              <div class="progress mb-2" style="height: 8px;">
-                <div class="progress-bar bg-${framework.status === 'compliant' ? 'success' : framework.status === 'partial' ? 'warning' : 'danger'}"
-                     style="width: ${framework.score}%"></div>
-              </div>
-              <small class="text-muted">${framework.score}% compliant</small><br>
-              <small class="text-muted">${framework.controls} controls</small>
+    renderFrameworks() {
+      const grid = document.getElementById('frameworks-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      this.frameworks.forEach(framework => {
+        const statusClass = {
+          'compliant': 'status-compliant',
+          'partial': 'status-partial',
+          'non-compliant': 'status-non-compliant'
+        }[framework.status];
+        
+        const statusText = framework.status === 'compliant' ? 'Compliant' : 'Partial';
+        const statusColor = framework.status === 'compliant' ? '#28a745' : '#ffc107';
+
+        const col = document.createElement('div');
+        col.className = 'col-md-3 col-6 mb-3';
+        col.innerHTML = `
+          <div class="text-center p-2">
+            <div class="d-flex justify-content-center mb-2">
+              <span class="framework-status ${statusClass}"></span>
             </div>
-          `;
-          grid.appendChild(col);
-        });
-      }
-
-      loadControls() {
-        this.controls = [
-          { id: 'AC-01', name: 'Access Control Policy', framework: 'NIST', status: 'passed', severity: 'high', lastCheck: '2024-01-15T10:30:00Z' },
-          { id: 'AC-02', name: 'Account Management', framework: 'NIST', status: 'passed', severity: 'high', lastCheck: '2024-01-15T10:25:00Z' },
-          { id: 'AC-03', name: 'Access Enforcement', framework: 'NIST', status: 'failed', severity: 'critical', lastCheck: '2024-01-15T10:20:00Z' },
-          { id: 'SI-01', name: 'Security Training', framework: 'ISO 27001', status: 'passed', severity: 'medium', lastCheck: '2024-01-15T10:15:00Z' },
-          { id: 'SI-02', name: 'Incident Response', framework: 'ISO 27001', status: 'passed', severity: 'high', lastCheck: '2024-01-15T10:10:00Z' },
-          { id: 'DP-01', name: 'Data Protection', framework: 'GDPR', status: 'passed', severity: 'critical', lastCheck: '2024-01-15T10:05:00Z' },
-          { id: 'DP-02', name: 'Privacy Policy', framework: 'GDPR', status: 'warning', severity: 'high', lastCheck: '2024-01-15T10:00:00Z' },
-          { id: 'SC-01', name: 'Secure Configuration', framework: 'CIS', status: 'passed', severity: 'medium', lastCheck: '2024-01-15T09:55:00Z' }
-        ];
-
-        this.renderControls();
-      }
-
-      renderControls() {
-        const container = document.getElementById('controls-list');
-        container.innerHTML = '';
-
-        this.controls.slice(0, 8).forEach(control => {
-          const controlDiv = document.createElement('div');
-          controlDiv.className = `control-item ${control.status === 'passed' ? 'control-compliant' : 'control-failed'}`;
-
-          const statusIcon = control.status === 'passed' ? '✓' : control.status === 'failed' ? '✗' : '⚠️';
-          const statusColor = control.status === 'passed' ? 'text-success' : control.status === 'failed' ? 'text-danger' : 'text-warning';
-
-          controlDiv.innerHTML = `
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="d-flex align-items-center mb-1">
-                  <span class="${statusColor} me-2">${statusIcon}</span>
-                  <code class="me-2">${control.id}</code>
-                  <small class="badge bg-secondary">${control.framework}</small>
-                </div>
-                <strong>${control.name}</strong>
-                <br><small class="text-muted">Last checked: ${new Date(control.lastCheck).toLocaleString()}</small>
-              </div>
-              <div class="text-end">
-                <small class="badge bg-${control.severity === 'critical' ? 'danger' : control.severity === 'high' ? 'warning' : 'info'}">${control.severity}</small>
-              </div>
+            <i class="fas ${framework.icon} mb-2" style="color: #ff6b35; font-size: 1.3rem;"></i>
+            <h6 class="mb-1 fw-bold">${framework.name}</h6>
+            <div class="framework-progress">
+              <div class="framework-progress-bar" style="width: ${framework.score}%"></div>
             </div>
-          `;
-
-          container.appendChild(controlDiv);
-        });
-      }
-
-      initCharts() {
-        const ctx = document.getElementById('complianceChart').getContext('2d');
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-              label: 'Compliance Score',
-              data: [82, 85, 87, 89, 91, 87],
-              borderColor: 'rgba(0, 123, 255, 1)',
-              backgroundColor: 'rgba(0, 123, 255, 0.1)',
-              tension: 0.4,
-              fill: true
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              y: {
-                beginAtZero: false,
-                min: 75,
-                max: 95,
-                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-              },
-              x: {
-                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-              }
-            }
-          }
-        });
-      }
-
-      runAssessment() {
-        // Simulate running a compliance assessment
-        this.showNotification('🔄 Running compliance assessment...', 'info');
-
-        setTimeout(() => {
-          // Randomly update some control statuses
-          this.controls.forEach(control => {
-            if (Math.random() < 0.3) { // 30% chance of status change
-              const statuses = ['passed', 'failed', 'warning'];
-              control.status = statuses[Math.floor(Math.random() * statuses.length)];
-              control.lastCheck = new Date().toISOString();
-            }
-          });
-
-          this.renderControls();
-          this.updateFrameworkScores();
-          this.addAuditEntry('Compliance Assessment', 'All Frameworks', 'completed', 'Automated assessment completed');
-          this.showNotification('✅ Assessment completed! Results updated.', 'success');
-        }, 3000);
-      }
-
-      updateFrameworkScores() {
-        this.frameworks.forEach(framework => {
-          // Calculate score based on control compliance
-          const frameworkControls = this.controls.filter(c => c.framework === framework.name.substring(0, 4));
-          if (frameworkControls.length > 0) {
-            const passedCount = frameworkControls.filter(c => c.status === 'passed').length;
-            framework.score = Math.round((passedCount / frameworkControls.length) * 100);
-          }
-        });
-
-        this.renderFrameworks();
-      }
-
-      generateReport() {
-        this.showNotification('📄 Generating audit report...', 'info');
-
-        setTimeout(() => {
-          this.addAuditEntry('Report Generation', 'All Frameworks', 'completed', 'Comprehensive audit report generated');
-          this.showNotification('📋 Report generated successfully! Check downloads.', 'success');
-        }, 2000);
-      }
-
-      scheduleAssessment() {
-        this.showNotification('📅 Assessment scheduled for tomorrow 09:00', 'success');
-        this.addAuditEntry('Assessment Scheduling', 'Automated', 'scheduled', 'Daily compliance assessment scheduled');
-      }
-
-      configureAlerts() {
-        this.showNotification('⚙️ Alert configuration panel opened', 'info');
-        // In a real implementation, this would open a modal or navigate to settings
-      }
-
-      populateAuditTrail() {
-        const auditEntries = [
-          { timestamp: '2024-01-15T14:30:00Z', action: 'Control Assessment', framework: 'NIST CSF', status: 'passed', evidence: 'Automated scan completed' },
-          { timestamp: '2024-01-15T14:25:00Z', action: 'Policy Review', framework: 'GDPR', status: 'completed', evidence: 'Privacy policy validated' },
-          { timestamp: '2024-01-15T14:20:00Z', action: 'Access Audit', framework: 'SOC 2', status: 'passed', evidence: 'User access logs reviewed' },
-          { timestamp: '2024-01-15T14:15:00Z', action: 'Configuration Check', framework: 'CIS', status: 'warning', evidence: 'Some settings need adjustment' },
-          { timestamp: '2024-01-15T14:10:00Z', action: 'Encryption Validation', framework: 'PCI DSS', status: 'passed', evidence: 'All data properly encrypted' }
-        ];
-
-        this.auditTrail = auditEntries;
-        this.renderAuditTrail();
-      }
-
-      addAuditEntry(action, framework, status, evidence) {
-        const entry = {
-          timestamp: new Date().toISOString(),
-          action: action,
-          framework: framework,
-          status: status,
-          evidence: evidence
-        };
-
-        this.auditTrail.unshift(entry);
-        if (this.auditTrail.length > 20) {
-          this.auditTrail = this.auditTrail.slice(0, 20);
-        }
-
-        this.renderAuditTrail();
-      }
-
-      renderAuditTrail() {
-        const tbody = document.getElementById('audit-table');
-        tbody.innerHTML = '';
-
-        this.auditTrail.slice(0, 10).forEach(entry => {
-          const row = document.createElement('tr');
-          const statusBadge = entry.status === 'passed' || entry.status === 'completed' ?
-            'success' : entry.status === 'warning' ? 'warning' : 'secondary';
-
-          row.innerHTML = `
-            <td>${new Date(entry.timestamp).toLocaleString()}</td>
-            <td>${entry.action}</td>
-            <td>${entry.framework}</td>
-            <td><span class="badge bg-${statusBadge}">${entry.status}</span></td>
-            <td><small>${entry.evidence}</small></td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-
-      showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        notification.style.cssText = 'top: 80px; right: 20px; z-index: 1000; min-width: 300px;';
-        notification.innerHTML = `
-          ${message}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <span class="small fw-semibold" style="color: ${statusColor}">${statusText}</span>
+            <small class="text-muted d-block">${framework.score}% · ${framework.controls} controls</small>
+          </div>
         `;
+        grid.appendChild(col);
+      });
+    }
 
-        document.body.appendChild(notification);
+    loadControls() {
+      this.controls = [
+        { id: 'AC-01', name: 'Access Control Policy', framework: 'NIST', status: 'passed', severity: 'high', lastCheck: new Date(Date.now() - 3600000).toISOString() },
+        { id: 'AC-02', name: 'Account Management', framework: 'NIST', status: 'passed', severity: 'high', lastCheck: new Date(Date.now() - 7200000).toISOString() },
+        { id: 'AC-03', name: 'Access Enforcement', framework: 'NIST', status: 'warning', severity: 'critical', lastCheck: new Date(Date.now() - 10800000).toISOString() },
+        { id: 'SI-01', name: 'Security Training', framework: 'ISO 27001', status: 'passed', severity: 'medium', lastCheck: new Date(Date.now() - 14400000).toISOString() },
+        { id: 'SI-02', name: 'Incident Response', framework: 'ISO 27001', status: 'passed', severity: 'high', lastCheck: new Date(Date.now() - 18000000).toISOString() },
+        { id: 'DP-01', name: 'Data Protection', framework: 'GDPR', status: 'passed', severity: 'critical', lastCheck: new Date(Date.now() - 21600000).toISOString() },
+        { id: 'DP-02', name: 'Privacy Policy', framework: 'GDPR', status: 'warning', severity: 'high', lastCheck: new Date(Date.now() - 25200000).toISOString() },
+        { id: 'SC-01', name: 'Secure Configuration', framework: 'CIS', status: 'passed', severity: 'medium', lastCheck: new Date(Date.now() - 28800000).toISOString() }
+      ];
+      this.renderControls();
+    }
 
-        setTimeout(() => {
-          if (notification.parentNode) {
-            notification.remove();
+    renderControls() {
+      const container = document.getElementById('controls-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      this.controls.slice(0, 8).forEach(control => {
+        const statusClass = control.status === 'passed' ? 'control-compliant' : control.status === 'failed' ? 'control-failed' : 'control-warning';
+        const statusIcon = control.status === 'passed' ? 'fa-check-circle' : control.status === 'failed' ? 'fa-times-circle' : 'fa-exclamation-triangle';
+        const statusColor = control.status === 'passed' ? '#28a745' : control.status === 'failed' ? '#dc3545' : '#ffc107';
+
+        const controlDiv = document.createElement('div');
+        controlDiv.className = `control-item ${statusClass}`;
+        controlDiv.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="fas ${statusIcon}" style="color: ${statusColor};"></i>
+                <code class="fw-bold">${control.id}</code>
+                <span class="badge stat-badge small">${control.framework}</span>
+              </div>
+              <strong class="small">${control.name}</strong>
+              <br><small class="text-muted">Last checked: ${new Date(control.lastCheck).toLocaleTimeString()}</small>
+            </div>
+            <span class="badge" style="background: ${control.severity === 'critical' ? '#dc3545' : control.severity === 'high' ? '#ffc107' : '#17a2b8'}; color: white;">${control.severity}</span>
+          </div>
+        `;
+        container.appendChild(controlDiv);
+      });
+    }
+
+    initCharts() {
+      const isDark = document.body.classList.contains('dark-theme');
+      const ctx = document.getElementById('complianceChart').getContext('2d');
+      this.complianceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Compliance Score',
+            data: [82, 85, 87, 89, 91, 87],
+            borderColor: '#ff6b35',
+            backgroundColor: 'rgba(255, 107, 53, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#ff6b35',
+            pointBorderColor: '#fff',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => `Score: ${ctx.raw}%` } }
+          },
+          scales: {
+            y: { beginAtZero: false, min: 75, max: 95, grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } },
+            x: { grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } }
           }
-        }, 4000);
-      }
-
-      startPeriodicUpdates() {
-        // Simulate periodic compliance checks
-        setInterval(() => {
-          if (Math.random() < 0.3) { // 30% chance every 30 seconds
-            this.runAssessment();
-          }
-        }, 30000);
-      }
-    }
-
-    // Global functions
-    function runAssessment() {
-      if (window.complianceDemo) window.complianceDemo.runAssessment();
-    }
-
-    function generateReport() {
-      if (window.complianceDemo) window.complianceDemo.generateReport();
-    }
-
-    function scheduleAssessment() {
-      if (window.complianceDemo) window.complianceDemo.scheduleAssessment();
-    }
-
-    function configureAlerts() {
-      if (window.complianceDemo) window.complianceDemo.configureAlerts();
-    }
-
-    // Initialize demo when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      window.complianceDemo = new ComplianceDemo();
-
-      // Theme switching for compliance suite
-      const lightThemeBtn = document.getElementById('light-theme-btn');
-      const darkThemeBtn = document.getElementById('dark-theme-btn');
-      const body = document.body;
-
-      // Get saved theme
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-
-      // Apply initial theme
-      setTheme(savedTheme);
-
-      function setTheme(theme) {
-        if (theme === 'light') {
-          body.classList.add('light-theme');
-          lightThemeBtn?.classList.add('active');
-          darkThemeBtn?.classList.remove('active');
-        } else {
-          body.classList.remove('light-theme');
-          darkThemeBtn?.classList.add('active');
-          lightThemeBtn?.classList.remove('active');
         }
-        localStorage.setItem('theme', theme);
-      }
+      });
+    }
 
-      // Event listeners
-      lightThemeBtn?.addEventListener('click', () => setTheme('light'));
-      darkThemeBtn?.addEventListener('click', () => setTheme('dark'));
-    });
-  </script>
+    runAssessment() {
+      this.showNotification('🔄 Running compliance assessment...', 'info');
+      setTimeout(() => {
+        this.controls.forEach(control => {
+          if (Math.random() < 0.3) {
+            const statuses = ['passed', 'warning', 'passed'];
+            control.status = statuses[Math.floor(Math.random() * statuses.length)];
+            control.lastCheck = new Date().toISOString();
+          }
+        });
+        this.renderControls();
+        this.updateFrameworkScores();
+        this.addAuditEntry('Compliance Assessment', 'All Frameworks', 'Completed', 'Automated assessment completed');
+        this.showNotification('✅ Assessment completed! Results updated.', 'success');
+      }, 2500);
+    }
+
+    updateFrameworkScores() {
+      this.frameworks.forEach(framework => {
+        const frameworkPrefix = framework.name.substring(0, 4);
+        const frameworkControls = this.controls.filter(c => c.framework === frameworkPrefix || c.framework === framework.name);
+        if (frameworkControls.length > 0) {
+          const passedCount = frameworkControls.filter(c => c.status === 'passed').length;
+          framework.score = Math.round((passedCount / frameworkControls.length) * 100);
+          framework.status = framework.score >= 85 ? 'compliant' : framework.score >= 70 ? 'partial' : 'non-compliant';
+        }
+      });
+      this.renderFrameworks();
+      
+      // Update chart with new data point
+      if (this.complianceChart) {
+        const newData = [...this.complianceChart.data.datasets[0].data.slice(1), this.frameworks.reduce((sum, f) => sum + f.score, 0) / this.frameworks.length];
+        this.complianceChart.data.datasets[0].data = newData;
+        this.complianceChart.update();
+      }
+    }
+
+    generateReport() {
+      this.showNotification('📄 Generating audit report...', 'info');
+      setTimeout(() => {
+        this.addAuditEntry('Report Generation', 'All Frameworks', 'Completed', 'Comprehensive audit report generated');
+        this.showNotification('📋 Report generated successfully!', 'success');
+      }, 2000);
+    }
+
+    scheduleAssessment() {
+      this.showNotification('📅 Daily assessment scheduled for 02:00 AM', 'success');
+      this.addAuditEntry('Assessment Scheduling', 'Automated', 'Scheduled', 'Daily compliance assessment scheduled');
+    }
+
+    configureAlerts() {
+      this.showNotification('⚙️ Alert configuration panel ready', 'info');
+    }
+
+    populateAuditTrail() {
+      const auditEntries = [
+        { timestamp: new Date(Date.now() - 3600000).toISOString(), action: 'Control Assessment', framework: 'NIST CSF', status: 'Passed', evidence: 'All controls validated' },
+        { timestamp: new Date(Date.now() - 7200000).toISOString(), action: 'Policy Review', framework: 'GDPR', status: 'Completed', evidence: 'Privacy policy updated' },
+        { timestamp: new Date(Date.now() - 10800000).toISOString(), action: 'Access Audit', framework: 'SOC 2', status: 'Passed', evidence: 'User access logs reviewed' },
+        { timestamp: new Date(Date.now() - 14400000).toISOString(), action: 'Configuration Check', framework: 'CIS', status: 'Warning', evidence: 'Some settings need adjustment' },
+        { timestamp: new Date(Date.now() - 18000000).toISOString(), action: 'Encryption Validation', framework: 'PCI DSS', status: 'Passed', evidence: 'All data properly encrypted' }
+      ];
+      this.auditTrail = auditEntries;
+      this.renderAuditTrail();
+    }
+
+    addAuditEntry(action, framework, status, evidence) {
+      this.auditTrail.unshift({ timestamp: new Date().toISOString(), action, framework, status, evidence });
+      if (this.auditTrail.length > 15) this.auditTrail = this.auditTrail.slice(0, 15);
+      this.renderAuditTrail();
+    }
+
+    renderAuditTrail() {
+      const tbody = document.getElementById('audit-table');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      this.auditTrail.slice(0, 8).forEach(entry => {
+        const row = document.createElement('tr');
+        const statusBadge = entry.status === 'Passed' || entry.status === 'Completed' ? 'success' : entry.status === 'Warning' ? 'warning' : 'secondary';
+        row.innerHTML = `
+          <td class="small">${new Date(entry.timestamp).toLocaleString()}</td>
+          <td>${entry.action}</td>
+          <td>${entry.framework}</td>
+          <td><span class="badge bg-${statusBadge} bg-opacity-75">${entry.status}</span></td>
+          <td><small class="text-muted">${entry.evidence}</small></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    showNotification(message, type) {
+      let notification = document.getElementById('compliance-notification');
+      if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'compliance-notification';
+        notification.className = 'alert alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top: 80px; right: 20px; z-index: 1000; min-width: 300px; border-radius: 12px;';
+        document.body.appendChild(notification);
+      }
+      const bgColor = type === 'success' ? '#28a745' : type === 'danger' ? '#dc3545' : '#ff6b35';
+      notification.style.background = bgColor;
+      notification.style.color = 'white';
+      notification.innerHTML = `${message}<button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>`;
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    startPeriodicUpdates() {
+      setInterval(() => {
+        if (Math.random() < 0.4) this.runAssessment();
+      }, 45000);
+    }
+  }
+
+  // Global functions
+  function runAssessment() { if (window.complianceDemo) window.complianceDemo.runAssessment(); }
+  function generateReport() { if (window.complianceDemo) window.complianceDemo.generateReport(); }
+  function scheduleAssessment() { if (window.complianceDemo) window.complianceDemo.scheduleAssessment(); }
+  function configureAlerts() { if (window.complianceDemo) window.complianceDemo.configureAlerts(); }
+
+  // Theme management
+  function initTheme() {
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('secops_theme', 'dark');
+        darkBtn?.classList.add('active');
+        lightBtn?.classList.remove('active');
+      } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('secops_theme', 'light');
+        lightBtn?.classList.add('active');
+        darkBtn?.classList.remove('active');
+      }
+      // Refresh chart colors on theme change
+      if (window.complianceDemo?.complianceChart) {
+        const isDark = theme === 'dark';
+        const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+        window.complianceDemo.complianceChart.options.scales.y.grid.color = gridColor;
+        window.complianceDemo.complianceChart.options.scales.x.grid.color = gridColor;
+        window.complianceDemo.complianceChart.update();
+      }
+    };
+
+    const savedTheme = localStorage.getItem('secops_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(savedTheme === 'dark' || (!savedTheme && prefersDark) ? 'dark' : 'light');
+
+    const lightBtn = document.getElementById('lightModeBtn');
+    const darkBtn = document.getElementById('darkModeBtn');
+    if (lightBtn) lightBtn.addEventListener('click', () => setTheme('light'));
+    if (darkBtn) darkBtn.addEventListener('click', () => setTheme('dark'));
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    window.complianceDemo = new ComplianceDemo();
+  });
+</script>
 </body>
 </html>

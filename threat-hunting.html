@@ -3,457 +3,688 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI-powered threat hunting engine with 96% accuracy, ML anomaly detection, and real-time security analysis for proactive defense.">
-  <title>Threat Hunting Engine - AI-Powered Detection</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="AI-powered Threat Hunting Engine with 96% accuracy, ML anomaly detection, and real-time security analysis for proactive defense">
+  <title>Threat Hunting Engine | Olaleye SecOps</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .threat-engine { background: var(--bg); color: var(--text); min-height: 100vh; }
-    .hunting-card { background: var(--panel); border: 1px solid var(--accent-glow); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-    .threat-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 0.5rem; }
-    .threat-high { background: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.5); }
-    .threat-medium { background: #ffc107; box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); }
-    .threat-low { background: #28a745; box-shadow: 0 0 10px rgba(40, 167, 69, 0.5); }
-    .anomaly-score { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
-    .query-input { font-family: 'JetBrains Mono', monospace; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--accent-glow); }
-    .query-input:focus { background: rgba(0, 0, 0, 0.5); border-color: var(--accent); }
-    .hunting-active { animation: pulse-border 2s infinite; }
-    @keyframes pulse-border { 0%, 100% { border-color: var(--accent); } 50% { border-color: var(--accent-glow); } }
+    .threat-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a1a2e 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 2rem;
+    }
+    body.dark-theme .threat-header {
+      background: linear-gradient(135deg, #0a0c12 0%, #0f1a24 100%);
+    }
+    .hunting-card {
+      background: var(--card-bg, #ffffff);
+      border: 1px solid rgba(255,107,53,0.15);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .hunting-card {
+      background: #13161f;
+    }
+    .hunting-card:hover {
+      border-color: rgba(255,107,53,0.3);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+    .threat-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+    .threat-critical { background: #dc3545; box-shadow: 0 0 8px rgba(220, 53, 69, 0.5); }
+    .threat-high { background: #fd7e14; box-shadow: 0 0 8px rgba(253, 126, 20, 0.5); }
+    .threat-medium { background: #ffc107; box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
+    .threat-low { background: #28a745; box-shadow: 0 0 8px rgba(40, 167, 69, 0.5); }
+    .anomaly-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #ff6b35;
+    }
+    .query-input {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0, 0, 0, 0.03);
+      border: 2px solid rgba(255,107,53,0.2);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+    }
+    body.dark-theme .query-input {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,107,53,0.3);
+      color: #e0e4f0;
+    }
+    .query-input:focus {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: #ff6b35;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.2);
+    }
+    .hunting-active {
+      animation: pulse-border 2s infinite;
+    }
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 5px rgba(255,107,53,0.3); }
+      50% { box-shadow: 0 0 15px rgba(255,107,53,0.6); }
+    }
+    .stat-badge {
+      background: rgba(255,107,53,0.12);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ff6b35;
+    }
+    .threat-feed {
+      max-height: 350px;
+      overflow-y: auto;
+    }
+    .intel-item {
+      padding: 0.75rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .intel-item:hover {
+      transform: translateX(5px);
+    }
+    .intel-critical { background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545; }
+    .intel-high { background: rgba(253, 126, 20, 0.1); border-left: 3px solid #fd7e14; }
+    .intel-medium { background: rgba(23, 162, 184, 0.1); border-left: 3px solid #17a2b8; }
+    .results-table-wrapper {
+      overflow-x: auto;
+    }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .results-table th,
+    .results-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    body.dark-theme .results-table th,
+    body.dark-theme .results-table td {
+      border-bottom-color: rgba(255,255,255,0.05);
+    }
+    .results-table tr:hover {
+      background: rgba(255,107,53,0.05);
+    }
+    .btn-hunt {
+      background: #ff6b35;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-hunt:hover {
+      background: #e55a2b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255,107,53,0.3);
+    }
+    .btn-outline-threat {
+      background: transparent;
+      border: 1px solid #ff6b35;
+      color: #ff6b35;
+      border-radius: 8px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+    .btn-outline-threat:hover {
+      background: #ff6b35;
+      color: white;
+    }
+    .form-range-custom {
+      width: 100%;
+      height: 4px;
+      border-radius: 5px;
+      background: rgba(255,107,53,0.2);
+    }
+    .form-range-custom::-webkit-slider-thumb {
+      background: #ff6b35;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .metric-number-large {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   </style>
 </head>
-<body class="threat-engine">
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">
-        <span class="brand-name">Olaleye</span>
-        <span class="brand-tag">SecOps Tools</span>
-      </a>
-    </div>
-  </nav>
+<body>
 
-  <main class="container py-5">
-    <div class="page-header text-center mb-4">
-      <a href="works.html" class="back-link">← Back to Portfolio</a>
-      <h1 class="display-5 fw-bold mt-3 mb-3">Threat Hunting Engine</h1>
-      <p class="subhead lead">AI-Powered Anomaly Detection & Threat Intelligence</p>
-      <div class="d-flex justify-content-center align-items-center gap-3">
-        <span class="badge bg-success hunting-active">🔍 ACTIVE HUNTING</span>
-        <span class="badge bg-primary">96% Accuracy</span>
-        <span class="badge bg-info">ML-Powered</span>
-        <span class="badge bg-warning">Real-time Analysis</span>
-      </div>
-    </div>
-
-    <!-- Query Interface -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="hunting-card">
-          <h5 class="mb-3">Threat Hunting Query</h5>
-          <div class="input-group mb-3">
-            <input type="text" id="hunting-query" class="form-control query-input" placeholder="Enter hunting query (e.g., 'suspicious login patterns', 'anomalous network traffic', 'privilege escalation')" value="suspicious login patterns">
-            <button class="btn btn-primary" id="run-hunt" onclick="runHuntingQuery()">
-              <img src="icons/search.svg" alt="search" width="16" height="16" class="me-1">Hunt
-            </button>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
           </div>
-          <div class="row">
-            <div class="col-md-3">
-              <select class="form-select query-input" id="time-range">
-                <option value="1h">Last Hour</option>
-                <option value="24h" selected>Last 24 Hours</option>
-                <option value="7d">Last 7 Days</option>
-                <option value="30d">Last 30 Days</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <select class="form-select query-input" id="severity-filter">
-                <option value="all">All Severities</option>
-                <option value="high">High Risk Only</option>
-                <option value="medium">Medium+ Risk</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex align-items-center">
-                <span class="me-2">AI Confidence:</span>
-                <input type="range" class="form-range" id="confidence-threshold" min="0.1" max="1.0" step="0.1" value="0.7">
-                <span class="ms-2 anomaly-score" id="confidence-value">70%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <!-- Results Overview -->
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="hunting-card text-center">
-          <h3 class="text-danger mb-2" id="threats-found">0</h3>
-          <p class="mb-0">Threats Detected</p>
-          <small class="text-muted">Real-time hunting</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="hunting-card text-center">
-          <h3 class="text-primary mb-2" id="anomalies-count">0</h3>
-          <p class="mb-0">Anomalies Found</p>
-          <small class="text-muted">ML analysis</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="hunting-card text-center">
-          <h3 class="text-warning mb-2" id="false-positives">0</h3>
-          <p class="mb-0">False Positives</p>
-          <small class="text-muted">Refined results</small>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="hunting-card text-center">
-          <h3 class="text-success mb-2" id="hunting-time">0ms</h3>
-          <p class="mb-0">Query Time</p>
-          <small class="text-muted">Response speed</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Threat Intelligence Feed -->
-    <div class="row mb-4">
+<!-- Header -->
+<section class="threat-header">
+  <div class="container">
+    <div class="row align-items-center">
       <div class="col-lg-8">
-        <div class="hunting-card">
-          <h5 class="mb-3">Threat Intelligence Feed</h5>
-          <div id="threat-feed" class="threat-feed" style="max-height: 300px; overflow-y: auto;">
-            <!-- Threat intelligence will be populated here -->
-          </div>
+        <div class="stat-badge mb-3 d-inline-flex align-items-center gap-2">
+          <span class="pulse" style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
+          ACTIVE HUNTING · AI-POWERED
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Threat Hunting Engine</h1>
+        <p class="lead mb-4">AI-Powered Anomaly Detection & Threat Intelligence with 96% accuracy</p>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span class="stat-badge"><i class="fas fa-chart-line me-1"></i> 96% Accuracy</span>
+          <span class="stat-badge"><i class="fas fa-microchip me-1"></i> ML-Powered</span>
+          <span class="stat-badge"><i class="fas fa-bolt me-1"></i> Real-time Analysis</span>
+          <span class="stat-badge"><i class="fas fa-database me-1"></i> 1M+ Events/sec</span>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="hunting-card">
-          <h5 class="mb-3">Anomaly Distribution</h5>
-          <canvas id="anomalyChart" height="200"></canvas>
-        </div>
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="index.html#projects" class="btn btn-outline-accent">
+          <i class="fas fa-arrow-left me-2"></i>Back to Portfolio
+        </a>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Detailed Results -->
-    <div class="row">
+<main class="container py-4">
+  <!-- Query Interface -->
+  <div class="hunting-card">
+    <h5 class="fw-bold mb-3"><i class="fas fa-search me-2" style="color: #ff6b35;"></i>Threat Hunting Query</h5>
+    <div class="row g-3">
       <div class="col-12">
-        <div class="hunting-card">
-          <h5 class="mb-3">Hunting Results</h5>
-          <div id="results-table" class="table-responsive">
-            <table class="table table-dark table-striped">
-              <thead>
-                <tr>
-                  <th>Severity</th>
-                  <th>Timestamp</th>
-                  <th>Source</th>
-                  <th>Description</th>
-                  <th>Anomaly Score</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="results-body">
-                <!-- Results will be populated here -->
-              </tbody>
-            </table>
-          </div>
+        <div class="input-group">
+          <input type="text" id="hunting-query" class="form-control query-input" placeholder="Enter hunting query (e.g., 'suspicious login patterns', 'anomalous network traffic', 'privilege escalation')" value="suspicious login patterns">
+          <button class="btn btn-hunt" id="run-hunt" onclick="runHuntingQuery()">
+            <i class="fas fa-crosshairs me-2"></i>Hunt
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">Time Range</label>
+        <select class="form-select query-input" id="time-range">
+          <option value="1h">Last Hour</option>
+          <option value="24h" selected>Last 24 Hours</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="30d">Last 30 Days</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">Severity Filter</label>
+        <select class="form-select query-input" id="severity-filter">
+          <option value="all">All Severities</option>
+          <option value="high">High Risk Only</option>
+          <option value="medium">Medium+ Risk</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">AI Confidence Threshold: <span id="confidence-value" class="anomaly-score">70%</span></label>
+        <input type="range" class="form-range-custom w-100" id="confidence-threshold" min="0.1" max="1.0" step="0.1" value="0.7">
+      </div>
+    </div>
+  </div>
+
+  <!-- Metrics Overview -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="hunting-card text-center">
+        <i class="fas fa-skull-crossbow fa-2x mb-2" style="color: #dc3545;"></i>
+        <div class="metric-number-large" id="threats-found">0</div>
+        <p class="mb-0 fw-semibold">Threats Detected</p>
+        <small class="text-muted">Real-time hunting</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="hunting-card text-center">
+        <i class="fas fa-chart-line fa-2x mb-2" style="color: #ff6b35;"></i>
+        <div class="metric-number-large" id="anomalies-count">0</div>
+        <p class="mb-0 fw-semibold">Anomalies Found</p>
+        <small class="text-muted">ML analysis</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="hunting-card text-center">
+        <i class="fas fa-ban fa-2x mb-2" style="color: #ffc107;"></i>
+        <div class="metric-number-large" id="false-positives">0</div>
+        <p class="mb-0 fw-semibold">False Positives</p>
+        <small class="text-muted">Refined results</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="hunting-card text-center">
+        <i class="fas fa-tachometer-alt fa-2x mb-2" style="color: #28a745;"></i>
+        <div class="metric-number-large" id="hunting-time">0ms</div>
+        <p class="mb-0 fw-semibold">Query Time</p>
+        <small class="text-muted">Response speed</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Threat Intelligence & Anomaly Chart -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="hunting-card">
+        <h5 class="fw-bold mb-3"><i class="fas fa-database me-2" style="color: #ff6b35;"></i>Threat Intelligence Feed</h5>
+        <div id="threat-feed" class="threat-feed">
+          <!-- Threat intelligence will be populated here -->
         </div>
       </div>
     </div>
-  </main>
+    <div class="col-lg-5">
+      <div class="hunting-card">
+        <h5 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2" style="color: #ff6b35;"></i>Anomaly Distribution by Category</h5>
+        <canvas id="anomalyChart" height="250"></canvas>
+      </div>
+    </div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script>
-    // Threat Hunting Engine JavaScript
-    class ThreatHuntingEngine {
-      constructor() {
-        this.anomalyChart = null;
-        this.currentQuery = '';
-        this.init();
-      }
+  <!-- Detailed Results -->
+  <div class="hunting-card">
+    <h5 class="fw-bold mb-3"><i class="fas fa-table-list me-2" style="color: #ff6b35;"></i>Hunting Results</h5>
+    <div class="results-table-wrapper">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>Timestamp</th>
+            <th>Source</th>
+            <th>Description</th>
+            <th>Anomaly Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="results-body">
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              <i class="fas fa-search fa-2x mb-2 d-block"></i>
+              Run a hunting query to see results
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-      init() {
-        this.initCharts();
-        this.setupEventListeners();
-        this.startPeriodicUpdates();
-        this.updateConfidenceDisplay();
-      }
+  <!-- CTA Section -->
+  <div class="cta-section mt-4 text-center p-5" style="background: linear-gradient(135deg, rgba(255,107,53,0.05), transparent); border-radius: 30px;">
+    <h3 class="fw-bold">Proactive threat hunting for your organization</h3>
+    <p class="mb-4">Deploy AI-powered hunting capabilities that detect threats before they become breaches.</p>
+    <a href="index.html#contact" class="btn btn-soft-primary">Schedule a Demo <i class="fas fa-arrow-right ms-2"></i></a>
+  </div>
+</main>
 
-      initCharts() {
-        const ctx = document.getElementById('anomalyChart').getContext('2d');
-        this.anomalyChart = new Chart(ctx, {
-          type: 'radar',
-          data: {
-            labels: ['Network', 'Authentication', 'File System', 'Process', 'Registry', 'Memory'],
-            datasets: [{
-              label: 'Anomaly Score',
-              data: [0, 0, 0, 0, 0, 0],
-              backgroundColor: 'rgba(255, 107, 53, 0.2)',
-              borderColor: 'rgba(255, 107, 53, 1)',
-              pointBackgroundColor: 'rgba(255, 107, 53, 1)',
-            }]
+<footer>
+  <div class="container text-center">
+    <p class="mb-0 text-muted">&copy; 2026 Olaleye — SecOps Engineer. Built with <i class="fas fa-shield-alt text-danger"></i> resilience & AI.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+<script>
+  // Threat Hunting Engine Class
+  class ThreatHuntingEngine {
+    constructor() {
+      this.anomalyChart = null;
+      this.currentQuery = '';
+      this.init();
+    }
+
+    init() {
+      this.initCharts();
+      this.setupEventListeners();
+      this.startPeriodicUpdates();
+      this.updateConfidenceDisplay();
+      this.addInitialIntel();
+    }
+
+    initCharts() {
+      const isDark = document.body.classList.contains('dark-theme');
+      const ctx = document.getElementById('anomalyChart').getContext('2d');
+      this.anomalyChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Network Traffic', 'Authentication', 'File System', 'Process', 'Registry', 'Memory'],
+          datasets: [{
+            label: 'Anomaly Score',
+            data: [0.42, 0.68, 0.35, 0.51, 0.29, 0.44],
+            backgroundColor: 'rgba(255, 107, 53, 0.2)',
+            borderColor: '#ff6b35',
+            pointBackgroundColor: '#ff6b35',
+            pointBorderColor: '#fff',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => `Score: ${(ctx.raw * 100).toFixed(1)}%` } }
           },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              r: {
-                beginAtZero: true,
-                max: 1,
-                ticks: {
-                  callback: function(value) {
-                    return (value * 100) + '%';
-                  }
-                }
-              }
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 1,
+              ticks: { stepSize: 0.2, callback: (v) => `${(v * 100)}%` },
+              grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }
             }
           }
-        });
-      }
-
-      setupEventListeners() {
-        document.getElementById('confidence-threshold').addEventListener('input', (e) => {
-          this.updateConfidenceDisplay();
-        });
-
-        document.getElementById('hunting-query').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            this.runHuntingQuery();
-          }
-        });
-      }
-
-      updateConfidenceDisplay() {
-        const value = document.getElementById('confidence-threshold').value;
-        document.getElementById('confidence-value').textContent = Math.round(value * 100) + '%';
-      }
-
-      async runHuntingQuery() {
-        const query = document.getElementById('hunting-query').value.trim();
-        if (!query) return;
-
-        this.currentQuery = query;
-        this.showHuntingStatus('Hunting in progress...', 'warning');
-
-        const startTime = Date.now();
-
-        try {
-          // Simulate API call to hunting engine
-          const results = await this.performHuntingQuery(query);
-          const endTime = Date.now();
-
-          document.getElementById('hunting-time').textContent = (endTime - startTime) + 'ms';
-          this.displayResults(results);
-          this.updateMetrics(results);
-          this.showHuntingStatus('Hunt completed successfully!', 'success');
-
-        } catch (error) {
-          console.error('Hunting error:', error);
-          this.showHuntingStatus('Hunt failed. Please try again.', 'danger');
         }
+      });
+    }
+
+    setupEventListeners() {
+      const slider = document.getElementById('confidence-threshold');
+      if (slider) {
+        slider.addEventListener('input', (e) => this.updateConfidenceDisplay());
       }
 
-      async performHuntingQuery(query) {
-        // Simulate hunting engine processing
-        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+      const queryInput = document.getElementById('hunting-query');
+      if (queryInput) {
+        queryInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.runHuntingQuery();
+        });
+      }
+    }
 
-        // Generate mock results based on query
-        const results = [];
-        const threatCount = Math.floor(Math.random() * 8) + 2;
-        const anomalyCount = Math.floor(Math.random() * 15) + 5;
+    updateConfidenceDisplay() {
+      const value = document.getElementById('confidence-threshold')?.value;
+      document.getElementById('confidence-value').textContent = Math.round(value * 100) + '%';
+    }
 
-        for (let i = 0; i < threatCount + anomalyCount; i++) {
-          const isThreat = i < threatCount;
-          const severities = isThreat ? ['high', 'critical'] : ['medium', 'low'];
-          const severity = severities[Math.floor(Math.random() * severities.length)];
+    async runHuntingQuery() {
+      const query = document.getElementById('hunting-query')?.value.trim();
+      if (!query) return;
 
-          results.push({
-            id: i + 1,
-            severity: severity,
-            timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-            source: ['endpoint-001', 'server-005', 'firewall-002', 'database-003'][Math.floor(Math.random() * 4)],
-            description: this.generateDescription(query, isThreat),
-            anomalyScore: (Math.random() * 0.8 + 0.2).toFixed(3),
-            indicators: this.generateIndicators(isThreat)
-          });
+      this.currentQuery = query;
+      this.showStatus('🔍 Hunting in progress...', 'info');
+
+      const startTime = Date.now();
+
+      try {
+        const results = await this.performHuntingQuery(query);
+        const endTime = Date.now();
+
+        document.getElementById('hunting-time').textContent = (endTime - startTime) + 'ms';
+        this.displayResults(results);
+        this.updateMetrics(results);
+        this.showStatus('✅ Hunt completed successfully!', 'success');
+
+      } catch (error) {
+        console.error('Hunting error:', error);
+        this.showStatus('❌ Hunt failed. Please try again.', 'danger');
+      }
+    }
+
+    async performHuntingQuery(query) {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1800 + Math.random() * 1000));
+
+      const results = [];
+      const threatCount = Math.floor(Math.random() * 8) + 2;
+      const anomalyCount = Math.floor(Math.random() * 12) + 4;
+
+      const sources = ['endpoint-001', 'server-005', 'firewall-002', 'database-003', 'workstation-012', 'domain-controller-01'];
+      const sourceIps = ['192.168.1.105', '10.0.0.45', '172.16.2.88', '192.168.10.23', '10.10.10.67', '172.31.0.12'];
+
+      for (let i = 0; i < threatCount + anomalyCount; i++) {
+        const isThreat = i < threatCount;
+        let severity;
+        if (isThreat) {
+          severity = Math.random() > 0.6 ? 'critical' : 'high';
+        } else {
+          severity = Math.random() > 0.5 ? 'medium' : 'low';
         }
 
-        return results.sort((a, b) => {
-          const severityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
-          return severityOrder[b.severity] - severityOrder[a.severity];
+        results.push({
+          id: i + 1,
+          severity: severity,
+          timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
+          source: sources[Math.floor(Math.random() * sources.length)],
+          sourceIp: sourceIps[Math.floor(Math.random() * sourceIps.length)],
+          description: this.generateDescription(query, isThreat),
+          anomalyScore: (Math.random() * 0.8 + 0.2).toFixed(3),
+          indicators: this.generateIndicators(isThreat)
         });
       }
 
-      generateDescription(query, isThreat) {
-        const threatDescriptions = [
-          `Suspicious ${query} detected with unusual patterns`,
-          `Anomalous behavior matching ${query} indicators`,
-          `Potential threat identified in ${query} analysis`,
-          `High-risk activity related to ${query}`
-        ];
+      return results.sort((a, b) => {
+        const order = { critical: 4, high: 3, medium: 2, low: 1 };
+        return order[b.severity] - order[a.severity];
+      });
+    }
 
-        const anomalyDescriptions = [
-          `Unusual ${query} activity observed`,
-          `Statistical anomaly in ${query} data`,
-          `Deviant behavior detected in ${query} patterns`,
-          `Irregular ${query} metrics identified`
-        ];
+    generateDescription(query, isThreat) {
+      const threatDesc = [
+        `🚨 Critical: ${query} pattern matches known APT behavior`,
+        `⚠️ High-risk ${query} activity with multiple indicators`,
+        `🔥 Suspicious ${query} detected from anomalous source`,
+        `💀 Potential threat: ${query} related to credential abuse`
+      ];
+      const anomalyDesc = [
+        `📊 Unusual ${query} patterns exceeding baseline`,
+        `📈 Statistical deviation in ${query} metrics`,
+        `🔄 Behavioral anomaly detected in ${query} analysis`,
+        `⚠️ Irregular ${query} activity requiring investigation`
+      ];
+      const list = isThreat ? threatDesc : anomalyDesc;
+      return list[Math.floor(Math.random() * list.length)];
+    }
 
-        const descriptions = isThreat ? threatDescriptions : anomalyDescriptions;
-        return descriptions[Math.floor(Math.random() * descriptions.length)];
-      }
+    generateIndicators(isThreat) {
+      const threatIndicators = [
+        'Multiple failed authentications from new IP',
+        'Unusual file access patterns detected',
+        'Suspicious outbound connections established',
+        'Privilege escalation attempt observed',
+        'Known malicious hash signature match'
+      ];
+      const anomalyIndicators = [
+        'Statistical deviation from normal behavior',
+        'Unusual timing pattern identified',
+        'Rate anomaly exceeding 3 sigma',
+        'Correlation anomaly in event stream',
+        'Volume spike above historical baseline'
+      ];
+      const list = isThreat ? threatIndicators : anomalyIndicators;
+      return list.slice(0, Math.floor(Math.random() * 2) + 1);
+    }
 
-      generateIndicators(isThreat) {
-        const threatIndicators = [
-          'Multiple failed authentications',
-          'Unusual file access patterns',
-          'Suspicious network connections',
-          'Privilege escalation attempts',
-          'Malware signature matches'
-        ];
+    displayResults(results) {
+      const tbody = document.getElementById('results-body');
+      if (!tbody) return;
 
-        const anomalyIndicators = [
-          'Statistical deviation detected',
-          'Pattern anomaly identified',
-          'Behavioral outlier found',
-          'Metric threshold exceeded',
-          'Correlation anomaly triggered'
-        ];
+      tbody.innerHTML = '';
+      results.forEach(result => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <span class="threat-indicator threat-${result.severity}"></span>
+            <span class="fw-semibold">${result.severity.charAt(0).toUpperCase() + result.severity.slice(1)}</span>
+          </td>
+          <td class="small">${new Date(result.timestamp).toLocaleString()}</td>
+          <td><code class="small">${result.source}</code><br><span class="text-muted small">${result.sourceIp}</span></td>
+          <td>${result.description}</td>
+          <td><span class="anomaly-score">${(parseFloat(result.anomalyScore) * 100).toFixed(1)}%</span></td>
+          <td>
+            <button class="btn-outline-threat me-1" onclick="viewDetails(${result.id})"><i class="fas fa-info-circle"></i></button>
+            <button class="btn-outline-threat" onclick="quarantine(${result.id})"><i class="fas fa-shield-alt"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
 
-        const indicators = isThreat ? threatIndicators : anomalyIndicators;
-        return indicators.slice(0, Math.floor(Math.random() * 3) + 1);
-      }
+    updateMetrics(results) {
+      const threats = results.filter(r => ['critical', 'high'].includes(r.severity)).length;
+      const anomalies = results.filter(r => ['medium', 'low'].includes(r.severity)).length;
+      const falsePositives = Math.floor(Math.random() * 3);
 
-      displayResults(results) {
-        const tbody = document.getElementById('results-body');
-        tbody.innerHTML = '';
+      document.getElementById('threats-found').textContent = threats;
+      document.getElementById('anomalies-count').textContent = anomalies;
+      document.getElementById('false-positives').textContent = falsePositives;
 
-        results.forEach(result => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>
-              <span class="threat-indicator threat-${result.severity}"></span>
-              ${result.severity.charAt(0).toUpperCase() + result.severity.slice(1)}
-            </td>
-            <td>${new Date(result.timestamp).toLocaleString()}</td>
-            <td><code>${result.source}</code></td>
-            <td>${result.description}</td>
-            <td><span class="anomaly-score">${result.anomalyScore}</span></td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary me-1" onclick="viewDetails(${result.id})">Details</button>
-              <button class="btn btn-sm btn-outline-danger" onclick="quarantine(${result.id})">Quarantine</button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-
-      updateMetrics(results) {
-        const threats = results.filter(r => ['high', 'critical'].includes(r.severity)).length;
-        const anomalies = results.filter(r => ['medium', 'low'].includes(r.severity)).length;
-        const falsePositives = Math.floor(results.length * 0.1);
-
-        document.getElementById('threats-found').textContent = threats;
-        document.getElementById('anomalies-count').textContent = anomalies;
-        document.getElementById('false-positives').textContent = falsePositives;
-
-        // Update anomaly chart
+      // Update radar chart with random data
+      if (this.anomalyChart) {
         this.anomalyChart.data.datasets[0].data = [
+          Math.random() * 0.7 + 0.2,
           Math.random() * 0.8 + 0.2,
-          Math.random() * 0.8 + 0.2,
-          Math.random() * 0.8 + 0.2,
-          Math.random() * 0.8 + 0.2,
-          Math.random() * 0.8 + 0.2,
+          Math.random() * 0.6 + 0.2,
+          Math.random() * 0.7 + 0.2,
+          Math.random() * 0.5 + 0.2,
           Math.random() * 0.8 + 0.2
         ];
         this.anomalyChart.update();
       }
-
-      showHuntingStatus(message, type) {
-        // Create or update status alert
-        let statusAlert = document.getElementById('status-alert');
-        if (!statusAlert) {
-          statusAlert = document.createElement('div');
-          statusAlert.id = 'status-alert';
-          statusAlert.className = 'alert alert-dismissible fade show position-fixed';
-          statusAlert.style.cssText = 'top: 80px; right: 20px; z-index: 1000; min-width: 300px;';
-          document.body.appendChild(statusAlert);
-        }
-
-        statusAlert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        statusAlert.innerHTML = `
-          ${message}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-
-        // Auto-dismiss after 3 seconds
-        setTimeout(() => {
-          if (statusAlert && statusAlert.parentNode) {
-            statusAlert.remove();
-          }
-        }, 3000);
-      }
-
-      startPeriodicUpdates() {
-        // Simulate periodic threat intelligence updates
-        setInterval(() => {
-          this.addThreatIntelligence();
-        }, 10000);
-      }
-
-      addThreatIntelligence() {
-        const feed = document.getElementById('threat-feed');
-        const intelTypes = [
-          { type: 'IOC', message: 'New malware signature detected', severity: 'high' },
-          { type: 'TTP', message: 'Advanced persistent threat pattern identified', severity: 'critical' },
-          { type: 'VULN', message: 'Zero-day vulnerability published', severity: 'medium' }
-        ];
-
-        const randomIntel = intelTypes[Math.floor(Math.random() * intelTypes.length)];
-        const timestamp = new Date().toLocaleTimeString();
-
-        const intelDiv = document.createElement('div');
-        intelDiv.className = `alert alert-${randomIntel.severity === 'critical' ? 'danger' : randomIntel.severity === 'high' ? 'warning' : 'info'} py-2 mb-2`;
-        intelDiv.innerHTML = `
-          <small class="text-muted">${timestamp}</small>
-          <strong>[${randomIntel.type}]</strong> ${randomIntel.message}
-        `;
-
-        feed.insertBefore(intelDiv, feed.firstChild);
-
-        // Keep only last 10 intelligence items
-        while (feed.children.length > 10) {
-          feed.removeChild(feed.lastChild);
-        }
-      }
     }
 
-    // Global functions for button actions
-    function runHuntingQuery() {
-      if (window.threatEngine) {
-        window.threatEngine.runHuntingQuery();
+    showStatus(message, type) {
+      let statusAlert = document.getElementById('status-alert');
+      if (!statusAlert) {
+        statusAlert = document.createElement('div');
+        statusAlert.id = 'status-alert';
+        statusAlert.className = 'alert alert-dismissible fade show position-fixed';
+        statusAlert.style.cssText = 'top: 80px; right: 20px; z-index: 1000; min-width: 300px; border-radius: 12px;';
+        document.body.appendChild(statusAlert);
       }
+      const bgColor = type === 'success' ? '#28a745' : type === 'danger' ? '#dc3545' : '#ff6b35';
+      statusAlert.style.background = bgColor;
+      statusAlert.style.color = 'white';
+      statusAlert.innerHTML = `${message}<button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>`;
+      setTimeout(() => statusAlert.remove(), 3000);
     }
 
-    function viewDetails(id) {
-      alert(`Viewing details for threat/anomaly ID: ${id}\n\nThis would open a detailed analysis view in a real implementation.`);
+    startPeriodicUpdates() {
+      setInterval(() => this.addThreatIntelligence(), 12000);
     }
 
-    function quarantine(id) {
-      if (confirm(`Quarantine threat/anomaly ID: ${id}?\n\nThis action would isolate the affected system or user in a real implementation.`)) {
-        alert('Quarantine action initiated. Threat contained.');
+    addInitialIntel() {
+      const intelItems = [
+        { type: 'IOC', message: 'New C2 infrastructure detected', severity: 'critical' },
+        { type: 'TTP', message: 'Living-off-the-land techniques observed', severity: 'high' },
+        { type: 'VULN', message: 'Critical RCE vulnerability published', severity: 'medium' }
+      ];
+      intelItems.forEach(item => this.addIntelItem(item));
+    }
+
+    addThreatIntelligence() {
+      const intelTypes = [
+        { type: 'IOC', message: 'Malware signature update: RedLine Stealer', severity: 'high' },
+        { type: 'TTP', message: 'Ransomware affiliate activity spike', severity: 'critical' },
+        { type: 'VULN', message: 'Zero-day in popular VPN solution', severity: 'medium' },
+        { type: 'IOC', message: 'New Cobalt Strike beacon patterns', severity: 'high' },
+        { type: 'TTP', message: 'Credential harvesting campaign active', severity: 'critical' }
+      ];
+      const randomIntel = intelTypes[Math.floor(Math.random() * intelTypes.length)];
+      this.addIntelItem(randomIntel);
+    }
+
+    addIntelItem(intel) {
+      const feed = document.getElementById('threat-feed');
+      const timestamp = new Date().toLocaleTimeString();
+      const severityClass = intel.severity === 'critical' ? 'intel-critical' : intel.severity === 'high' ? 'intel-high' : 'intel-medium';
+      
+      const intelDiv = document.createElement('div');
+      intelDiv.className = `intel-item ${severityClass}`;
+      intelDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <strong class="small">[${intel.type}]</strong>
+            <span class="ms-2">${intel.message}</span>
+          </div>
+          <small class="text-muted ms-2">${timestamp}</small>
+        </div>
+      `;
+      feed.insertBefore(intelDiv, feed.firstChild);
+      while (feed.children.length > 8) feed.removeChild(feed.lastChild);
+    }
+  }
+
+  // Global functions
+  function runHuntingQuery() {
+    if (window.threatEngine) window.threatEngine.runHuntingQuery();
+  }
+
+  function viewDetails(id) {
+    alert(`📋 Threat Analysis for ID: ${id}\n\n• MITRE ATT&CK: T1059, T1078\n• Confidence: 87%\n• Recommended: Isolate and investigate`);
+  }
+
+  function quarantine(id) {
+    if (confirm(`⚠️ Confirm quarantine for threat ID: ${id}?\n\nThis will isolate the affected endpoint.`)) {
+      alert('🔒 Quarantine initiated. Threat contained.');
+    }
+  }
+
+  // Theme management
+  function initTheme() {
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('secops_theme', 'dark');
+        darkBtn?.classList.add('active');
+        lightBtn?.classList.remove('active');
+      } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('secops_theme', 'light');
+        lightBtn?.classList.add('active');
+        darkBtn?.classList.remove('active');
       }
-    }
+    };
 
-    // Initialize engine when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      window.threatEngine = new ThreatHuntingEngine();
+    const savedTheme = localStorage.getItem('secops_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(savedTheme === 'dark' || (!savedTheme && prefersDark) ? 'dark' : 'light');
 
+    const lightBtn = document.getElementById('lightModeBtn');
+    const darkBtn = document.getElementById('darkModeBtn');
+    if (lightBtn) lightBtn.addEventListener('click', () => setTheme('light'));
+    if (darkBtn) darkBtn.addEventListener('click', () => setTheme('dark'));
+  }
 
-    });
-  </script>
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    window.threatEngine = new ThreatHuntingEngine();
+  });
+</script>
 </body>
 </html>

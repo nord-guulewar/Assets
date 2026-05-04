@@ -1,167 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Contact Olaleye, SecOps engineer specializing in security automation, threat detection, and enterprise security solutions.">
-    <title>Contact - SecOps Engineer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="styles.css" />
-    <link href="https://fonts.cdnfonts.com/css/roba" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact Olaleye - SecOps Engineer specializing in cybersecurity solutions">
+  <title>Contact - Olaleye</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <!-- <div id="preloader"><span>Olaleye</span></div> -->
-
-    <!-- Tech Background -->
-    <div class="tech-bg">
-      <canvas id="techCanvas"></canvas>
-      <div class="tech-overlay"></div>
+<body data-theme="dark">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-primary" href="index.html">
+        <i class="fas fa-shield-alt me-2"></i>Olaleye
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="works.html">Portfolio</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#contact">Contact</a></li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-      <div class="container">
-        <a class="navbar-brand" href="index.html">
-          <span class="brand-name">Olaleye</span>
-          <span class="brand-tag">SecOps Engineer</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="mainNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="works.html">Portfolio</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="contact.html">Contact</a>
-            </li>
-          </ul>
-          <div class="theme-toggles ms-3">
-            <button id="light-theme-btn" class="theme-btn light-btn" title="Light Theme" aria-label="Switch to light theme">
-              <img src="icons/sun.svg" alt="Light Theme" width="20" height="20">
-            </button>
-            <button id="dark-theme-btn" class="theme-btn dark-btn active" title="Dark Theme" aria-label="Switch to dark theme">
-              <img src="icons/moon.svg" alt="Dark Theme" width="20" height="20">
-            </button>
+  <!-- Contact Section -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">Let's Connect</h1>
+            <p class="lead">Ready to discuss your cybersecurity needs or explore collaboration opportunities</p>
+          </div>
+
+          <div class="row g-5">
+            <!-- Contact Form -->
+            <div class="col-lg-7">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                  <h3 class="card-title mb-4">Send a Message</h3>
+                  <form id="contactForm">
+                    <div class="mb-3">
+                      <label for="name" class="form-label fw-semibold">Full Name</label>
+                      <input type="text" id="name" name="name" class="form-control form-control-lg" placeholder="Your name" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="email" class="form-label fw-semibold">Email Address</label>
+                      <input type="email" id="email" name="email" class="form-control form-control-lg" placeholder="your.email@example.com" required>
+                    </div>
+                    <div class="mb-4">
+                      <label for="message" class="form-label fw-semibold">Message</label>
+                      <textarea id="message" name="message" class="form-control form-control-lg" rows="5" placeholder="Tell me about your project or inquiry..." required></textarea>
+                    </div>
+                    <div class="d-grid">
+                      <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                      </button>
+                    </div>
+                  </form>
+                  <div id="formMessage" class="mt-3 text-center"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-lg-5">
+              <div class="mb-4">
+                <h4 class="mb-4">Get In Touch</h4>
+                <div class="d-flex align-items-center justify-content-center mb-3">
+                  <a href="mailto:olaleyelekanjoseph@gmail.com" class="social-link">
+                    <img src="icons/email.svg" alt="Email" class="social-icon">
+                  </a>
+                </div>
+                <div class="d-flex align-items-center justify-content-center mb-3">
+                  <a href="https://github.com/nord-guulewar/mywebsite_portfolio" target="_blank" class="social-link">
+                    <img src="icons/github.svg" alt="GitHub" class="social-icon">
+                  </a>
+                </div>
+                <div class="d-flex align-items-center justify-content-center mb-3">
+                  <a href="https://x.com/OmoObaAderopo" target="_blank" class="social-link">
+                    <img src="icons/twitter.svg" alt="Twitter" class="social-icon">
+                  </a>
+                </div>
+                <div class="d-flex align-items-center justify-content-center">
+                  <a href="https://instagram.com/aderopoola" target="_blank" class="social-link">
+                    <img src="icons/instagram.svg" alt="Instagram" class="social-icon">
+                  </a>
+                </div>
+              </div>
+
+              <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body text-center">
+                  <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                  <h5>Response Time</h5>
+                  <p class="mb-0">I typically respond within 24 hours</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </nav>
+    </div>
+  </section>
 
-    <main class="container py-5">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <section id="contact" class="card">
-            <div class="card-body p-4 p-md-5">
-              <h3 class="card-title text-center mb-1">Contact Me</h3>
-              <h4 class="text-center text-muted mb-4">Quick message</h4>
-               <form id="contactForm">
-                 <div class="row g-3">
-                   <div class="col-md-6">
-                     <label for="name" class="form-label">Name</label>
-                     <input type="text" id="name" name="name" class="form-control" required />
-                   </div>
-                   <div class="col-md-6">
-                     <label for="email" class="form-label">Email</label>
-                     <input type="email" id="email" name="email" class="form-control" required />
-                   </div>
-                 </div>
-                 <div class="mt-3">
-                   <label for="message" class="form-label">Message</label>
-                   <textarea id="message" name="message" class="form-control" rows="5" required></textarea>
-                 </div>
-                 <div class="text-center mt-4">
-                   <button type="submit" class="btn btn-primary btn-lg px-5">Send message</button>
-                 </div>
-               </form>
-               <p id="formMessage" class="form-message text-center mt-3"></p>
-               
-<div class="contact-icons row g-2 mt-4">
-                  <div class="col-auto">
-                    <a class="social-button github w-100 d-flex align-items-center justify-content-center gap-1" href="https://github.com/nord-guulewar/mywebsite_portfolio" target="_blank" rel="noopener noreferrer">
-                      <img src="icons/github.svg" alt="GitHub" class="icon-img">
-                      <span class="label">GitHub</span>
-                    </a>
-                  </div>
-                  <div class="col-auto">
-                    <a class="social-button instagram w-100 d-flex align-items-center justify-content-center gap-1" href="https://instagram.com/aderopoola?igsh=dXZscmRzODBrZ2Ez" target="_blank" rel="noopener noreferrer">
-                      <img src="icons/instagram.svg" alt="Instagram" class="icon-img">
-                      <span class="label">Instagram</span>
-                    </a>
-                  </div>
-                  <div class="col-auto">
-                    <a class="social-button twitter w-100 d-flex align-items-center justify-content-center gap-1" href="https://x.com/OmoObaAderopo" target="_blank" rel="noopener noreferrer">
-                      <img src="icons/twitter.svg" alt="Twitter" class="icon-img">
-                      <span class="label">Twitter</span>
-                    </a>
-                  </div>
-                  <div class="col-auto">
-                    <a class="social-button email w-100 d-flex align-items-center justify-content-center gap-1" href="mailto:olaleyelekanjoseph@gmail.com">
-                      <img src="icons/email.svg" alt="Email" class="icon-img">
-                      <span class="label">Email</span>
-                    </a>
-                  </div>
-                </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </main>
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+      <p class="mb-0">&copy; 2026 Olaleye. Securing the digital world, one solution at a time.</p>
+    </div>
+  </footer>
 
-    <footer class="site-footer py-4">
-      <div class="container text-center">
-        <span class="text-muted">© 2026 nord_guelewar</span>
-      </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="script.js"></script>
-    <script>
-      // Preloader for contact page
-      document.addEventListener('DOMContentLoaded', function() {
-        const preloader = document.getElementById('preloader');
-        if (!preloader) return;
-        setTimeout(function() {
-          preloader.classList.add('hidden');
-          preloader.style.opacity = '0';
-          preloader.style.visibility = 'hidden';
-        }, 2500);
-
-        // Theme switching for contact page
-        const lightThemeBtn = document.getElementById('light-theme-btn');
-        const darkThemeBtn = document.getElementById('dark-theme-btn');
-        const body = document.body;
-
-        // Get saved theme
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-
-        // Apply initial theme
-        setTheme(savedTheme);
-
-        function setTheme(theme) {
-          if (theme === 'light') {
-            body.classList.add('light-theme');
-            lightThemeBtn?.classList.add('active');
-            darkThemeBtn?.classList.remove('active');
-          } else {
-            body.classList.remove('light-theme');
-            darkThemeBtn?.classList.add('active');
-            lightThemeBtn?.classList.remove('active');
-          }
-          localStorage.setItem('theme', theme);
-        }
-
-        // Event listeners
-        lightThemeBtn?.addEventListener('click', () => setTheme('light'));
-        darkThemeBtn?.addEventListener('click', () => setTheme('dark'));
-      });
-    </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
