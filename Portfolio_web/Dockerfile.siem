@@ -1,0 +1,22 @@
+# SIEM Dashboard Dockerfile
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+# Copy go mod files
+COPY siem-server.go go.mod go.sum ./
+
+# Download dependencies
+RUN go mod init siem-server && go mod tidy
+
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o siem-server .
+
+# Final stage
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /app/siem-server .
+
+EXPOSE 8080
+CMD ["./siem-server"]

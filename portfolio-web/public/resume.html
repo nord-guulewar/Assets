@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olaleye – Resume</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', monospace;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 1.5rem;
+            border: 1px solid #334155;
+            overflow: hidden;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
+        }
+
+        /* Header */
+        .header {
+            background: #0f172a;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .tagline {
+            color: #94a3b8;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .contact-info a, .contact-info span {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .contact-info span {
+            color: #cbd5e1;
+        }
+
+        /* Content */
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.25rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            color: #60a5fa;
+        }
+
+        .job, .project-item, .cert-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .job-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #f1f5f9;
+        }
+
+        .company, .date {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .skill-tag {
+            background: #334155;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            color: #e2e8f0;
+        }
+
+        .project-title {
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+
+        .project-item p {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-top: 0.25rem;
+        }
+
+        ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+            color: #cbd5e1;
+            font-size: 0.85rem;
+        }
+
+        li {
+            margin: 0.25rem 0;
+        }
+
+        /* Button */
+        .button-group {
+            text-align: center;
+            margin: 2rem 0 1rem;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #047857;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 1rem;
+            color: #60a5fa;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                background: white;
+                border: none;
+                box-shadow: none;
+            }
+            .header {
+                background: #f1f5f9;
+                border-bottom: 1px solid #ccc;
+            }
+            .header h1 {
+                background: none;
+                color: #0f172a;
+            }
+            .button-group, .back-link {
+                display: none;
+            }
+            .skill-tag {
+                background: #e2e8f0;
+                color: #0f172a;
+            }
+            .section h2 {
+                color: #0f172a;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <a href="/" class="back-link">← Back to Portfolio</a>
+        <a href="/works.html" class="back-link" style="margin-left: 1rem;">Projects</a>
+    </div>
+    <div class="container">
+        <div class="header">
+            <h1>Olaleye</h1>
+            <div class="tagline">Infosec Support Specialist | Incident Response | Security Collaboration</div>
+            <div class="contact-info">
+                <span>📍 Remote / Lagos, NG</span>
+                <span>📧 olaleyelekanjoseph@gmail.com</span>
+                <span>🔗 linkedin.com/in/olaleye</span>
+                <span>🐙 https://github.com/nord-guulewar</span>
+            </div>
+        </div>
+        <div class="content">
+            <div class="section">
+                <h2>Professional Summary</h2>
+                <p>Infosec support professional with strong incident response, ticketing system expertise, and a knack for translating technical risk into business outcomes. Proven ability to reduce resolution time, improve SLA compliance, and build knowledge bases that empower teams and customers.</p>
+            </div>
+
+            <div class="section">
+                <h2>Core Competencies</h2>
+                <div class="skills-list">
+                    <span class="skill-tag">Incident Triage</span>
+                    <span class="skill-tag">SLA Management</span>
+                    <span class="skill-tag">Ticket Workflows</span>
+                    <span class="skill-tag">Customer Communication</span>
+                    <span class="skill-tag">Knowledge Transfer</span>
+                    <span class="skill-tag">Playbook Development</span>
+                    <span class="skill-tag">Zendesk / Freshdesk</span>
+                    <span class="skill-tag">Jira Service Management</span>
+                    <span class="skill-tag">Confluence / Notion</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Experience</h2>
+                <div class="job">
+                    <div class="job-title">Infosec Support Specialist</div>
+                    <div class="company">Independent Practice (Remote) | 2023 – Present</div>
+                    <ul>
+                        <li>Triaged and resolved 50+ security incidents monthly, maintaining 98% SLA adherence.</li>
+                        <li>Reduced first-touch resolution time by 22% through playbook automation and knowledge base updates.</li>
+                        <li>Collaborated with SOC and engineering teams to escalate and remediate critical threats.</li>
+                        <li>Authored 15+ knowledge articles and incident response guides used by Tier 1 analysts.</li>
+                    </ul>
+                </div>
+                <div class="job">
+                    <div class="job-title">Technical Support Analyst</div>
+                    <div class="company">MSP (Lagos) | 2021 – 2023</div>
+                    <ul>
+                        <li>Managed ticket queues for 30+ SMB clients, prioritizing security-related issues.</li>
+                        <li>Implemented escalation tracking that reduced misrouted tickets by 35%.</li>
+                        <li>Trained new hires on Zendesk workflows and incident response procedures.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Certifications</h2>
+                <ul>
+                    <li>Cisco Certified Ethical Hacker (2025)</li>
+                    <li>Critical Infrastructure Protection – Simplilearn (2024)</li>
+                    <li>Google Analytics (2023)</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Selected Projects</h2>
+                <div class="project-item">
+                    <div class="project-title">TPM-Less Guardian</div>
+                    <p>Browser-based file integrity monitor for devices without hardware TPM. SHA-256 hashing, baseline comparison, and visual dashboard.</p>
+                </div>
+                <div class="project-item">
+                    <div class="project-title">Phishing URL Scanner</div>
+                    <p>Real-time risk analysis tool checking domain age, SSL, keywords, and brand mismatch.</p>
+                </div>
+                <div class="project-item">
+                    <div class="project-title">IR Bot (Incident Stress Test)</div>
+                    <p>Interactive incident response simulator with timed decisions and morale/job security meters.</p>
+                </div>
+                <div class="project-item">
+                    <div class="project-title">Attack Surface Map</div>
+                    <p>3D interactive map visualizing enterprise assets and vulnerabilities.</p>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <a href="/resume.pdf" class="download-btn" download>📥 Download Resume (PDF)</a>
+                <a href="/resume.docx" class="download-btn" download style="background: #2563eb; margin-left: 1rem;">📄 Download Resume (DOCX)</a>
+            </div>
+            <p style="font-size: 0.7rem; text-align: center; color: #64748b; margin-top: 1rem;">Right-click and "Save link as" if download doesn't start automatically.</p>
+        </div>
+    </div>
+</body>
+</html>

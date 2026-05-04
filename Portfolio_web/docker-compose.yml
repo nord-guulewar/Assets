@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # SIEM Dashboard - Go Backend
+  siem-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.siem
+    ports:
+      - "8080:8080"
+    environment:
+      - GIN_MODE=release
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Threat Hunting Engine - Python Backend
+  threat-hunting-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.threat
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=threat-hunting-server.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/hunt/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SOAR Platform - F# Backend (simulated)
+  soar-backend:
+    image: mcr.microsoft.com/dotnet/sdk:7.0
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./soar-backend:/app
+    working_dir: /app
+    command: dotnet run --urls=http://0.0.0.0:5001
+    restart: unless-stopped
+
+  # Compliance Suite - .NET Backend
+  compliance-backend:
+    image: mcr.microsoft.com/dotnet/sdk:7.0
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./compliance-backend:/app
+    working_dir: /app
+    command: dotnet run --urls=http://0.0.0.0:5002
+    restart: unless-stopped
+
+  # ZTNA Gateway - Go Backend
+  ztna-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.ztna
+    ports:
+      - "5003:5003"
+    environment:
+      - GIN_MODE=release
+    restart: unless-stopped
+
+  # Frontend - Nginx serving static files
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - siem-backend
+      - threat-hunting-backend
+      - soar-backend
+      - compliance-backend
+      - ztna-backend
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge

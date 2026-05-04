@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Zero Trust Network Access gateway demo with continuous authentication, risk-based access control, and device posture assessment.">
+  <title>Zero Trust Gateway - Demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .ztna-demo { background: var(--bg); color: var(--text); min-height: 100vh; }
+    .gateway-card { background: var(--panel); border: 1px solid var(--accent-glow); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .access-status { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 0.5rem; }
+    .status-allowed { background: #28a745; box-shadow: 0 0 8px rgba(40, 167, 69, 0.5); }
+    .status-denied { background: #dc3545; box-shadow: 0 0 8px rgba(220, 53, 69, 0.5); }
+    .status-challenge { background: #ffc107; box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
+    .device-trust { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.5rem; }
+    .trust-high { background: #28a745; }
+    .trust-medium { background: #ffc107; }
+    .trust-low { background: #dc3545; }
+    .policy-rule { background: rgba(20, 20, 20, 0.5); border: 1px solid rgba(255, 107, 53, 0.2); border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; }
+    .access-log { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 0.5rem; border-bottom: 1px solid var(--accent-glow); }
+    .access-log:last-child { border-bottom: none; }
+    .demo-header { background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(40, 167, 69, 0.1)); border: 1px solid rgba(0, 123, 255, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+    .risk-meter { width: 100%; height: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; margin: 0.5rem 0; }
+    .risk-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+    .risk-low { background: linear-gradient(90deg, #28a745, #20c997); }
+    .risk-medium { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+    .risk-high { background: linear-gradient(90deg, #dc3545, #fd7e14); }
+  </style>
+</head>
+<body class="ztna-demo">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-name">Olaleye</span>
+        <span class="brand-tag">SecOps Tools</span>
+      </a>
+      <div class="theme-toggles ms-auto">
+        <button id="light-theme-btn" class="theme-btn light-btn" title="Light Theme" aria-label="Switch to light theme">
+          <img src="icons/sun.svg" alt="Light Theme" width="20" height="20">
+        </button>
+        <button id="dark-theme-btn" class="theme-btn dark-btn active" title="Dark Theme" aria-label="Switch to dark theme">
+          <img src="icons/moon.svg" alt="Dark Theme" width="20" height="20">
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="page-header text-center mb-4">
+      <a href="works.html" class="back-link">← Back to Portfolio</a>
+      <h1 class="display-5 fw-bold mt-3 mb-3">Zero Trust Gateway</h1>
+      <p class="subhead lead">Identity-Based Access Control & Continuous Authentication</p>
+      <div class="demo-header">
+        <h6 class="text-primary mb-2">🔐 LIVE ZERO TRUST DEMONSTRATION</h6>
+        <p class="mb-0">Experience continuous authentication and context-aware access control. Test different user scenarios and see how the gateway responds!</p>
+      </div>
+    </div>
+
+    <!-- Access Control Dashboard -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="gateway-card text-center">
+          <h3 class="text-success mb-2" id="access-allowed">127</h3>
+          <p class="mb-0">Access Granted</p>
+          <small class="text-muted">Last hour</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="gateway-card text-center">
+          <h3 class="text-danger mb-2" id="access-denied">23</h3>
+          <p class="mb-0">Access Denied</p>
+          <small class="text-muted">Policy violations</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="gateway-card text-center">
+          <h3 class="text-warning mb-2" id="step-up-auth">8</h3>
+          <p class="mb-0">Step-up Auth</p>
+          <small class="text-muted">Additional verification</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="gateway-card text-center">
+          <h3 class="text-info mb-2" id="active-sessions">156</h3>
+          <p class="mb-0">Active Sessions</p>
+          <small class="text-muted">Continuous monitoring</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Access Request Simulator -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="gateway-card">
+          <h5 class="mb-3">Access Request Simulator</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <label class="form-label">User Identity</label>
+              <select class="form-select mb-3" id="user-identity">
+                <option value="employee">Regular Employee</option>
+                <option value="contractor">External Contractor</option>
+                <option value="admin">System Administrator</option>
+                <option value="executive">Executive User</option>
+                <option value="suspicious">Suspicious User</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Device Trust Level</label>
+              <select class="form-select mb-3" id="device-trust">
+                <option value="high">High Trust (Corporate Device)</option>
+                <option value="medium">Medium Trust (Personal Device)</option>
+                <option value="low">Low Trust (Unknown Device)</option>
+                <option value="compromised">Compromised (Malware Detected)</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Resource Requested</label>
+              <select class="form-select mb-3" id="resource-request">
+                <option value="email">Corporate Email</option>
+                <option value="intranet">Internal Portal</option>
+                <option value="database">Production Database</option>
+                <option value="admin-panel">Admin Dashboard</option>
+                <option value="finance">Financial Systems</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label">Context Factors</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="office-hours" checked>
+                <label class="form-check-label" for="office-hours">Within Office Hours</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="corporate-network" checked>
+                <label class="form-check-label" for="corporate-network">On Corporate Network</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="recent-activity">
+                <label class="form-check-label" for="recent-activity">Recent User Activity</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Risk Assessment</label>
+              <div id="risk-assessment" class="mb-3">
+                <div class="risk-meter">
+                  <div class="risk-fill risk-low" id="risk-bar" style="width: 25%"></div>
+                </div>
+                <small class="text-muted" id="risk-level">Low Risk - Access Likely Granted</small>
+              </div>
+              <button class="btn btn-primary w-100" onclick="simulateAccess()">Request Access</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Policy Engine & Active Sessions -->
+    <div class="row mb-4">
+      <div class="col-lg-6">
+        <div class="gateway-card">
+          <h5 class="mb-3">Policy Engine Rules</h5>
+          <div id="policy-rules" class="policy-container" style="max-height: 300px; overflow-y: auto;">
+            <!-- Policy rules will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="gateway-card">
+          <h5 class="mb-3">Active Sessions Monitor</h5>
+          <div id="active-sessions-list" class="sessions-container" style="max-height: 300px; overflow-y: auto;">
+            <!-- Active sessions will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Access Logs -->
+    <div class="row">
+      <div class="col-12">
+        <div class="gateway-card">
+          <h5 class="mb-3">Real-time Access Logs</h5>
+          <div id="access-logs" class="logs-container" style="max-height: 400px; overflow-y: auto;">
+            <!-- Access logs will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script>
+    // Zero Trust Gateway Demo JavaScript
+    class ZTNADemo {
+      constructor() {
+        this.accessLogs = [];
+        this.activeSessions = [];
+        this.policyRules = [];
+        this.metrics = {
+          accessAllowed: 127,
+          accessDenied: 23,
+          stepUpAuth: 8,
+          activeSessions: 156
+        };
+        this.init();
+      }
+
+      init() {
+        this.loadPolicyRules();
+        this.loadActiveSessions();
+        this.startPeriodicUpdates();
+        this.updateMetricsDisplay();
+        this.setupEventListeners();
+        this.addInitialLogs();
+      }
+
+      loadPolicyRules() {
+        this.policyRules = [
+          {
+            id: 'POL-001',
+            name: 'Executive Access Policy',
+            description: 'C-Suite users get automatic approval for all systems',
+            conditions: ['User Role = Executive', 'Device Trust = High'],
+            action: 'Allow',
+            priority: 'High'
+          },
+          {
+            id: 'POL-002',
+            name: 'Contractor Restrictions',
+            description: 'External contractors limited to specific resources',
+            conditions: ['User Type = Contractor', 'Time = Business Hours'],
+            action: 'Step-up Auth',
+            priority: 'Medium'
+          },
+          {
+            id: 'POL-003',
+            name: 'Suspicious Activity Block',
+            description: 'Block access from suspicious or compromised devices',
+            conditions: ['Device Trust = Compromised', 'Location = Unknown'],
+            action: 'Deny',
+            priority: 'Critical'
+          },
+          {
+            id: 'POL-004',
+            name: 'Database Access Control',
+            description: 'Require MFA for database access outside office hours',
+            conditions: ['Resource = Database', 'Time = After Hours'],
+            action: 'MFA Required',
+            priority: 'High'
+          },
+          {
+            id: 'POL-005',
+            name: 'Network Location Policy',
+            description: 'VPN required for external network access',
+            conditions: ['Network = External', 'Resource = Internal'],
+            action: 'VPN Required',
+            priority: 'Medium'
+          }
+        ];
+
+        this.renderPolicyRules();
+      }
+
+      renderPolicyRules() {
+        const container = document.getElementById('policy-rules');
+        container.innerHTML = '';
+
+        this.policyRules.forEach(rule => {
+          const ruleDiv = document.createElement('div');
+          ruleDiv.className = 'policy-rule';
+          ruleDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <code class="me-2">${rule.id}</code>
+                <strong>${rule.name}</strong>
+              </div>
+              <span class="badge bg-${rule.priority === 'Critical' ? 'danger' : rule.priority === 'High' ? 'warning' : 'info'}">${rule.priority}</span>
+            </div>
+            <p class="mb-2">${rule.description}</p>
+            <div class="row">
+              <div class="col-6">
+                <small class="text-muted">Conditions:</small>
+                <ul class="mb-0 small">
+                  ${rule.conditions.map(c => `<li>${c}</li>`).join('')}
+                </ul>
+              </div>
+              <div class="col-6">
+                <small class="text-muted">Action:</small>
+                <br><strong class="text-${rule.action === 'Allow' ? 'success' : rule.action === 'Deny' ? 'danger' : 'warning'}">${rule.action}</strong>
+              </div>
+            </div>
+          `;
+          container.appendChild(ruleDiv);
+        });
+      }
+
+      loadActiveSessions() {
+        this.activeSessions = [
+          { user: 'john.doe@company.com', resource: 'Corporate Email', status: 'active', trust: 'high', lastActivity: new Date() },
+          { user: 'jane.smith@contractor.com', resource: 'Project Portal', status: 'step-up', trust: 'medium', lastActivity: new Date(Date.now() - 300000) },
+          { user: 'admin@company.com', resource: 'Admin Dashboard', status: 'active', trust: 'high', lastActivity: new Date(Date.now() - 120000) },
+          { user: 'bob.wilson@company.com', resource: 'Database Access', status: 'active', trust: 'high', lastActivity: new Date(Date.now() - 600000) },
+          { user: 'suspect.user@external.com', resource: 'Internal Portal', status: 'denied', trust: 'low', lastActivity: new Date(Date.now() - 180000) }
+        ];
+
+        this.renderActiveSessions();
+      }
+
+      renderActiveSessions() {
+        const container = document.getElementById('active-sessions-list');
+        container.innerHTML = '';
+
+        this.activeSessions.forEach(session => {
+          const sessionDiv = document.createElement('div');
+          sessionDiv.className = 'd-flex justify-content-between align-items-center p-2 border-bottom';
+
+          const statusClass = session.status === 'active' ? 'status-allowed' :
+                            session.status === 'denied' ? 'status-denied' : 'status-challenge';
+          const trustClass = session.trust === 'high' ? 'trust-high' :
+                           session.trust === 'medium' ? 'trust-medium' : 'trust-low';
+
+          sessionDiv.innerHTML = `
+            <div>
+              <div class="d-flex align-items-center">
+                <span class="access-status ${statusClass}"></span>
+                <strong class="me-2">${session.user.split('@')[0]}</strong>
+                <small class="text-muted">→ ${session.resource}</small>
+              </div>
+              <small class="text-muted">Last activity: ${session.lastActivity.toLocaleTimeString()}</small>
+            </div>
+            <div class="text-end">
+              <span class="device-trust ${trustClass}"></span>
+              <small class="badge bg-${session.status === 'active' ? 'success' : session.status === 'denied' ? 'danger' : 'warning'}">${session.status}</small>
+            </div>
+          `;
+          container.appendChild(sessionDiv);
+        });
+      }
+
+      setupEventListeners() {
+        // Update risk assessment when inputs change
+        ['user-identity', 'device-trust', 'resource-request'].forEach(id => {
+          document.getElementById(id).addEventListener('change', () => this.updateRiskAssessment());
+        });
+
+        ['office-hours', 'corporate-network', 'recent-activity'].forEach(id => {
+          document.getElementById(id).addEventListener('change', () => this.updateRiskAssessment());
+        });
+      }
+
+      updateRiskAssessment() {
+        const userIdentity = document.getElementById('user-identity').value;
+        const deviceTrust = document.getElementById('device-trust').value;
+        const resourceRequest = document.getElementById('resource-request').value;
+        const officeHours = document.getElementById('office-hours').checked;
+        const corporateNetwork = document.getElementById('corporate-network').checked;
+        const recentActivity = document.getElementById('recent-activity').checked;
+
+        // Calculate risk score based on factors
+        let riskScore = 0;
+
+        // User identity risk
+        const userRisk = { 'employee': 10, 'contractor': 30, 'admin': 5, 'executive': 5, 'suspicious': 80 };
+        riskScore += userRisk[userIdentity] || 50;
+
+        // Device trust risk
+        const deviceRisk = { 'high': 5, 'medium': 25, 'low': 50, 'compromised': 90 };
+        riskScore += deviceRisk[deviceTrust] || 25;
+
+        // Resource sensitivity
+        const resourceRisk = { 'email': 10, 'intranet': 20, 'database': 60, 'admin-panel': 80, 'finance': 70 };
+        riskScore += resourceRisk[resourceRequest] || 30;
+
+        // Context factors
+        if (!officeHours) riskScore += 15;
+        if (!corporateNetwork) riskScore += 20;
+        if (!recentActivity) riskScore += 10;
+
+        // Cap at 100
+        riskScore = Math.min(100, riskScore);
+
+        // Update UI
+        const riskBar = document.getElementById('risk-bar');
+        const riskLevel = document.getElementById('risk-level');
+
+        riskBar.style.width = riskScore + '%';
+
+        if (riskScore < 30) {
+          riskBar.className = 'risk-fill risk-low';
+          riskLevel.textContent = 'Low Risk - Access Likely Granted';
+          riskLevel.className = 'text-success';
+        } else if (riskScore < 60) {
+          riskBar.className = 'risk-fill risk-medium';
+          riskLevel.textContent = 'Medium Risk - May Require Additional Verification';
+          riskLevel.className = 'text-warning';
+        } else {
+          riskBar.className = 'risk-fill risk-high';
+          riskLevel.textContent = 'High Risk - Access Likely Denied or Requires Approval';
+          riskLevel.className = 'text-danger';
+        }
+      }
+
+      simulateAccess() {
+        const userIdentity = document.getElementById('user-identity').value;
+        const deviceTrust = document.getElementById('device-trust').value;
+        const resourceRequest = document.getElementById('resource-request').value;
+
+        // Determine access decision based on risk
+        const riskBar = document.getElementById('risk-bar');
+        const riskScore = parseInt(riskBar.style.width);
+
+        let decision, status;
+        if (riskScore < 30) {
+          decision = 'GRANTED';
+          status = 'allowed';
+          this.metrics.accessAllowed++;
+        } else if (riskScore < 60) {
+          decision = 'STEP-UP AUTH REQUIRED';
+          status = 'challenge';
+          this.metrics.stepUpAuth++;
+        } else {
+          decision = 'DENIED';
+          status = 'denied';
+          this.metrics.accessDenied++;
+        }
+
+        // Create log entry
+        const logEntry = {
+          timestamp: new Date(),
+          user: userIdentity.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          resource: resourceRequest.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          decision: decision,
+          riskScore: riskScore,
+          deviceTrust: deviceTrust,
+          status: status
+        };
+
+        this.addAccessLog(logEntry);
+        this.updateMetricsDisplay();
+
+        // Show notification
+        this.showNotification(`Access ${decision}`, status === 'allowed' ? 'success' : status === 'challenge' ? 'warning' : 'danger');
+      }
+
+      addAccessLog(entry) {
+        this.accessLogs.unshift(entry);
+        if (this.accessLogs.length > 50) {
+          this.accessLogs = this.accessLogs.slice(0, 50);
+        }
+        this.renderAccessLogs();
+      }
+
+      renderAccessLogs() {
+        const container = document.getElementById('access-logs');
+        container.innerHTML = '';
+
+        this.accessLogs.slice(0, 20).forEach(log => {
+          const logDiv = document.createElement('div');
+          logDiv.className = 'access-log';
+
+          const statusIcon = log.status === 'allowed' ? '✅' : log.status === 'denied' ? '❌' : '⚠️';
+          const statusColor = log.status === 'allowed' ? 'text-success' : log.status === 'denied' ? 'text-danger' : 'text-warning';
+
+          logDiv.innerHTML = `
+            <span class="text-muted">[${log.timestamp.toLocaleTimeString()}]</span>
+            <span class="${statusColor}">${statusIcon}</span>
+            <strong>${log.user}</strong> requested access to <strong>${log.resource}</strong>
+            <span class="badge bg-${log.status === 'allowed' ? 'success' : log.status === 'denied' ? 'danger' : 'warning'} ms-2">${log.decision}</span>
+            <small class="text-muted ms-2">Risk: ${log.riskScore}% | Device: ${log.deviceTrust}</small>
+          `;
+          container.appendChild(logDiv);
+        });
+      }
+
+      updateMetricsDisplay() {
+        document.getElementById('access-allowed').textContent = this.metrics.accessAllowed;
+        document.getElementById('access-denied').textContent = this.metrics.accessDenied;
+        document.getElementById('step-up-auth').textContent = this.metrics.stepUpAuth;
+        document.getElementById('active-sessions').textContent = this.metrics.activeSessions;
+      }
+
+      addInitialLogs() {
+        // Add some initial access logs
+        const initialLogs = [
+          { user: 'Regular Employee', resource: 'Corporate Email', decision: 'GRANTED', riskScore: 15, deviceTrust: 'high', status: 'allowed' },
+          { user: 'External Contractor', resource: 'Project Portal', decision: 'STEP-UP AUTH REQUIRED', riskScore: 45, deviceTrust: 'medium', status: 'challenge' },
+          { user: 'System Administrator', resource: 'Admin Dashboard', decision: 'GRANTED', riskScore: 8, deviceTrust: 'high', status: 'allowed' },
+          { user: 'Suspicious User', resource: 'Internal Portal', decision: 'DENIED', riskScore: 85, deviceTrust: 'low', status: 'denied' },
+          { user: 'Executive User', resource: 'Financial Systems', decision: 'GRANTED', riskScore: 12, deviceTrust: 'high', status: 'allowed' }
+        ];
+
+        initialLogs.forEach(log => {
+          log.timestamp = new Date(Date.now() - Math.random() * 3600000); // Within last hour
+          this.addAccessLog(log);
+        });
+      }
+
+      showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 80px; right: 20px; z-index: 1000; min-width: 300px;';
+        notification.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 4000);
+      }
+
+      startPeriodicUpdates() {
+        // Simulate periodic access requests
+        setInterval(() => {
+          if (Math.random() < 0.4) { // 40% chance every 10 seconds
+            this.simulateRandomAccess();
+          }
+        }, 10000);
+      }
+
+      simulateRandomAccess() {
+        const users = ['john.doe@company.com', 'jane.smith@contractor.com', 'admin@company.com', 'bob.wilson@company.com'];
+        const resources = ['Corporate Email', 'Internal Portal', 'Database Access', 'Admin Dashboard'];
+        const decisions = ['GRANTED', 'DENIED', 'STEP-UP AUTH REQUIRED'];
+
+        const randomLog = {
+          timestamp: new Date(),
+          user: users[Math.floor(Math.random() * users.length)].split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          resource: resources[Math.floor(Math.random() * resources.length)],
+          decision: decisions[Math.floor(Math.random() * decisions.length)],
+          riskScore: Math.floor(Math.random() * 100),
+          deviceTrust: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)],
+          status: 'allowed' // Most simulated requests are allowed
+        };
+
+        this.addAccessLog(randomLog);
+
+        if (randomLog.decision === 'GRANTED') {
+          this.metrics.accessAllowed++;
+        } else if (randomLog.decision === 'DENIED') {
+          this.metrics.accessDenied++;
+        } else {
+          this.metrics.stepUpAuth++;
+        }
+
+        this.updateMetricsDisplay();
+      }
+    }
+
+    // Global function
+    function simulateAccess() {
+      if (window.ztnaDemo) window.ztnaDemo.simulateAccess();
+    }
+
+    // Initialize demo when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      window.ztnaDemo = new ZTNADemo();
+
+      // Theme switching for ZTNA gateway
+      const lightThemeBtn = document.getElementById('light-theme-btn');
+      const darkThemeBtn = document.getElementById('dark-theme-btn');
+      const body = document.body;
+
+      // Get saved theme
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+
+      // Apply initial theme
+      setTheme(savedTheme);
+
+      function setTheme(theme) {
+        if (theme === 'light') {
+          body.classList.add('light-theme');
+          lightThemeBtn?.classList.add('active');
+          darkThemeBtn?.classList.remove('active');
+        } else {
+          body.classList.remove('light-theme');
+          darkThemeBtn?.classList.add('active');
+          lightThemeBtn?.classList.remove('active');
+        }
+        localStorage.setItem('theme', theme);
+      }
+
+      // Event listeners
+      lightThemeBtn?.addEventListener('click', () => setTheme('light'));
+      darkThemeBtn?.addEventListener('click', () => setTheme('dark'));
+    });
+  </script>
+</body>
+</html>

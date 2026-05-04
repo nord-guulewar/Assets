@@ -1,0 +1,11 @@
+# Threat Hunting Engine Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY threat-hunting-server.py requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5000
+CMD ["python", "threat-hunting-server.py"]

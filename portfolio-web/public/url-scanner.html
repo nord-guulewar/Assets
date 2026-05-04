@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Phishing URL Scanner | Security Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #60a5fa;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #f97316, #dc2626);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subhead {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Main card */
+        .card {
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid #334155;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Input area */
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        input {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            font-size: 1rem;
+            font-family: monospace;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f97316;
+        }
+
+        button {
+            background: #f97316;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #ea580c;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Risk meter */
+        .risk-meter {
+            background: #0f172a;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .risk-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .risk-bar {
+            background: #334155;
+            border-radius: 999px;
+            height: 24px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .risk-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .verdict {
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        /* Indicators grid */
+        .indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .indicator {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid #475569;
+        }
+
+        .indicator.pass { border-left-color: #22c55e; }
+        .indicator.fail { border-left-color: #ef4444; }
+        .indicator.warn { border-left-color: #f59e0b; }
+
+        .indicator-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-detail {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            word-break: break-all;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f97316;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .example-urls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .example-btn {
+            background: #334155;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .example-btn:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="/works.html" class="back-link">← Back to projects</a>
+        <h1>🎣 Phishing URL Scanner</h1>
+        <div class="subhead">Real-time URL risk analysis · Domain age · SSL · Pattern detection</div>
+    </div>
+
+    <div class="card">
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="https://paypal.verify-account.xyz/login" value="https://paypal.verify-account.xyz/login">
+            <button id="scanBtn">🔍 Scan URL</button>
+        </div>
+
+        <div class="example-urls">
+            <span style="font-size:0.7rem; color:#64748b;">Try:</span>
+            <span class="example-btn" data-url="https://paypal.verify-account.xyz/login">Suspicious PayPal</span>
+            <span class="example-btn" data-url="https://amazon-security-verification.com">Fake Amazon</span>
+            <span class="example-btn" data-url="https://google.com">Safe: google.com</span>
+            <span class="example-btn" data-url="https://github.com">Safe: github.com</span>
+        </div>
+
+        <div id="results" style="display: none;">
+            <div class="risk-meter">
+                <div style="font-size:0.85rem; color:#94a3b8;">RISK SCORE</div>
+                <div class="risk-score" id="riskScore">0</div>
+                <div class="risk-bar"><div class="risk-fill" id="riskFill"></div></div>
+                <div><span class="verdict" id="verdict"></span></div>
+            </div>
+
+            <h3 style="margin-bottom: 0.75rem;">🔍 Security Indicators</h3>
+            <div class="indicators" id="indicators"></div>
+        </div>
+
+        <div id="loading" style="display: none; text-align: center; padding: 2rem;">
+            <div class="loader"></div> <span style="margin-left: 0.5rem;">Analyzing URL...</span>
+        </div>
+
+        <div id="errorMsg" style="color: #f87171; text-align: center; display: none;"></div>
+    </div>
+
+    <div class="footer">
+        <p>🔍 Checks: Domain age (whois proxy), SSL validity, suspicious keywords, URL structure, known phishing patterns</p>
+        <p>⚠️ Free tier limitations: Some checks use simulated/mock data for demo. Production version uses real APIs (WHOIS, VirusTotal, Google Safe Browsing).</p>
+    </div>
+</div>
+
+<script>
+    // ----------------------------- SUSPICIOUS PATTERNS -----------------------------
+    const suspiciousKeywords = [
+        'verify', 'account', 'secure', 'login', 'signin', 'update', 'confirm',
+        'banking', 'paypal', 'appleid', 'microsoft', 'amazon', 'netflix',
+        'security', 'alert', 'suspended', 'unusual', 'activity', 'validate'
+    ];
+
+    const suspiciousTLDs = ['.xyz', '.top', '.club', '.online', '.site', '.click', '.loan', '.win'];
+
+    function extractDomain(url) {
+        try {
+            const urlObj = new URL(url);
+            return urlObj.hostname;
+        } catch {
+            return null;
+        }
+    }
+
+    function checkSuspiciousKeywords(url, domain) {
+        const lowerUrl = url.toLowerCase();
+        const matches = suspiciousKeywords.filter(kw => lowerUrl.includes(kw));
+        return {
+            passed: matches.length === 0,
+            score: Math.min(40, matches.length * 8),
+            details: matches.length > 0 ? `Contains suspicious keywords: ${matches.slice(0, 3).join(', ')}` : 'No suspicious keywords found',
+            severity: matches.length > 2 ? 'fail' : (matches.length > 0 ? 'warn' : 'pass')
+        };
+    }
+
+    function checkURLStructure(url) {
+        const hasAtSymbol = url.includes('@');
+        const hasDoubleDash = url.includes('--');
+        const hasIPAddress = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(url);
+        const encodedChars = (url.match(/%[0-9A-F]{2}/gi) || []).length > 3;
+
+        let score = 0;
+        if (hasAtSymbol) score += 25;
+        if (hasDoubleDash) score += 10;
+        if (hasIPAddress) score += 30;
+        if (encodedChars) score += 15;
+
+        let details = [];
+        if (hasAtSymbol) details.push('Contains @ symbol (phishing trick)');
+        if (hasDoubleDash) details.push('Contains double dash');
+        if (hasIPAddress) details.push('Uses IP address instead of domain');
+        if (encodedChars) details.push('Excessive URL encoding');
+
+        return {
+            passed: score === 0,
+            score: Math.min(40, score),
+            details: details.length > 0 ? details.join(', ') : 'Clean URL structure',
+            severity: score > 20 ? 'fail' : (score > 0 ? 'warn' : 'pass')
+        };
+    }
+
+    function checkTLD(domain) {
+        if (!domain) return { passed: true, score: 0, details: 'Unable to parse', severity: 'pass' };
+        const isSuspicious = suspiciousTLDs.some(tld => domain.endsWith(tld));
+        return {
+            passed: !isSuspicious,
+            score: isSuspicious ? 20 : 0,
+            details: isSuspicious ? `Suspicious TLD (${domain.split('.').pop()})` : 'Standard TLD',
+            severity: isSuspicious ? 'fail' : 'pass'
+        };
+    }
+
+    // Mock domain age (simulated since real WHOIS requires backend)
+    function checkDomainAge(domain) {
+        // Simulate based on domain name length + suspicious patterns
+        const isNew = domain && (domain.length > 20 || domain.includes('verify') || domain.includes('secure'));
+        return {
+            passed: !isNew,
+            score: isNew ? 25 : 0,
+            details: isNew ? 'Domain appears recently registered (simulated)' : 'Domain age appears established',
+            severity: isNew ? 'warn' : 'pass'
+        };
+    }
+
+    // Mock SSL check
+    function checkSSL(url) {
+        const isHTTPS = url.toLowerCase().startsWith('https');
+        return {
+            passed: isHTTPS,
+            score: isHTTPS ? 0 : 35,
+            details: isHTTPS ? 'Valid HTTPS' : 'No HTTPS - credentials sent in plaintext',
+            severity: isHTTPS ? 'pass' : 'fail'
+        };
+    }
+
+    function checkBrandMismatch(url, domain) {
+        const brandNames = ['paypal', 'amazon', 'apple', 'microsoft', 'google', 'netflix', 'facebook', 'bank'];
+        let detectedBrand = null;
+        for (const brand of brandNames) {
+            if (url.toLowerCase().includes(brand)) {
+                detectedBrand = brand;
+                break;
+            }
+        }
+        if (!detectedBrand) return { passed: true, score: 0, details: 'No brand reference detected', severity: 'pass' };
+
+        const domainMatchesBrand = domain && domain.toLowerCase().includes(detectedBrand);
+        return {
+            passed: domainMatchesBrand,
+            score: domainMatchesBrand ? 0 : 30,
+            details: domainMatchesBrand ? `Domain matches ${detectedBrand}` : `Claims to be ${detectedBrand} but domain is ${domain}`,
+            severity: domainMatchesBrand ? 'pass' : 'fail'
+        };
+    }
+
+    function calculateTotalScore(indicators) {
+        let total = 0;
+        for (const key in indicators) {
+            total += indicators[key].score;
+        }
+        return Math.min(100, total);
+    }
+
+    async function scanURL(url) {
+        const domain = extractDomain(url);
+        if (!domain) throw new Error('Invalid URL format');
+
+        const checks = {
+            ssl: checkSSL(url),
+            tld: checkTLD(domain),
+            domainAge: checkDomainAge(domain),
+            keywords: checkSuspiciousKeywords(url, domain),
+            urlStructure: checkURLStructure(url),
+            brandMismatch: checkBrandMismatch(url, domain)
+        };
+
+        const totalScore = calculateTotalScore(checks);
+        let verdict = '';
+        let verdictClass = '';
+
+        if (totalScore >= 70) {
+            verdict = '🔴 HIGH RISK - Do not proceed';
+            verdictClass = '#f87171';
+        } else if (totalScore >= 40) {
+            verdict = '⚠️ MEDIUM RISK - Proceed with caution';
+            verdictClass = '#f59e0b';
+        } else {
+            verdict = '🟢 LOW RISK - Appears safe';
+            verdictClass = '#4ade80';
+        }
+
+        return { checks, totalScore, verdict, verdictClass, domain };
+    }
+
+    function renderResults(result) {
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('riskScore').textContent = result.totalScore;
+        document.getElementById('riskFill').style.width = `${result.totalScore}%`;
+
+        // Color the risk bar
+        const riskFill = document.getElementById('riskFill');
+        if (result.totalScore >= 70) riskFill.style.background = '#ef4444';
+        else if (result.totalScore >= 40) riskFill.style.background = '#f59e0b';
+        else riskFill.style.background = '#22c55e';
+
+        const verdictEl = document.getElementById('verdict');
+        verdictEl.textContent = result.verdict;
+        verdictEl.style.background = result.verdictClass + '20';
+        verdictEl.style.color = result.verdictClass;
+        verdictEl.style.padding = '0.5rem 1rem';
+        verdictEl.style.borderRadius = '999px';
+
+        const indicatorsContainer = document.getElementById('indicators');
+        const checkNames = {
+            ssl: '🔒 SSL Certificate',
+            tld: '🌐 Top-Level Domain',
+            domainAge: '📅 Domain Age',
+            keywords: '⚠️ Suspicious Keywords',
+            urlStructure: '🔗 URL Structure',
+            brandMismatch: '🏷️ Brand Match'
+        };
+
+        indicatorsContainer.innerHTML = '';
+        for (const [key, check] of Object.entries(result.checks)) {
+            const severityClass = check.severity;
+            const icon = severityClass === 'fail' ? '❌' : (severityClass === 'warn' ? '⚠️' : '✅');
+            indicatorsContainer.innerHTML += `
+                <div class="indicator ${severityClass}">
+                    <div class="indicator-title">${icon} ${checkNames[key]}</div>
+                    <div class="indicator-detail">${check.details}</div>
+                </div>
+            `;
+        }
+    }
+
+    // Main scan handler
+    document.getElementById('scanBtn').onclick = async () => {
+        const urlInput = document.getElementById('urlInput');
+        let url = urlInput.value.trim();
+
+        if (!url) {
+            document.getElementById('errorMsg').textContent = 'Please enter a URL';
+            document.getElementById('errorMsg').style.display = 'block';
+            return;
+        }
+
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('scanBtn').disabled = true;
+
+        setTimeout(async () => {
+            try {
+                const result = await scanURL(url);
+                renderResults(result);
+            } catch (err) {
+                document.getElementById('errorMsg').textContent = err.message;
+                document.getElementById('errorMsg').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('scanBtn').disabled = false;
+            }
+        }, 500);
+    };
+
+    // Example buttons
+    document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.getElementById('urlInput').value = btn.dataset.url;
+            document.getElementById('scanBtn').click();
+        };
+    });
+
+    // Auto-scan on load (demo the suspicious URL)
+    setTimeout(() => {
+        document.getElementById('scanBtn').click();
+    }, 300);
+</script>
+</body>
+</html>

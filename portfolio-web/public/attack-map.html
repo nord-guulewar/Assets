@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Attack Surface Map | Olaleye</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            background: #000000;
+            color: #00ff41;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #00ff41;
+            text-decoration: none;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid #00ff41;
+            font-family: monospace;
+        }
+
+        .back-link:hover {
+            background: #00ff41;
+            color: black;
+        }
+
+        .title {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid #00ff41;
+            text-align: right;
+        }
+
+        .title h1 {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        .title p {
+            font-size: 0.6rem;
+            color: #00ff41aa;
+        }
+
+        #info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #00ff41;
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 100;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            font-family: monospace;
+            max-width: 400px;
+        }
+
+        .asset-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00ff41;
+        }
+
+        .risk-level {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-bottom: 8px;
+        }
+
+        .risk-critical { background: #ff0000; color: white; }
+        .risk-high { background: #ff6600; color: black; }
+        .risk-medium { background: #ffcc00; color: black; }
+        .risk-low { background: #00ff41; color: black; }
+
+        .vuln-list {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        .vuln-item {
+            margin: 4px 0;
+            padding-left: 12px;
+            border-left: 2px solid #00ff41;
+        }
+
+        @media (max-width: 768px) {
+            #info-panel { font-size: 0.7rem; padding: 12px; max-width: calc(100% - 40px); }
+            .asset-name { font-size: 0.9rem; }
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .instruction {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            color: #00ff4188;
+        }
+    </style>
+</head>
+<body>
+    <a href="/works.html" class="back-link">← BACK TO PROJECTS</a>
+    <div class="title">
+        <h1>⚡ ATTACK SURFACE MAP</h1>
+        <p>HOVER ANY NODE → SEE THE CHAOS</p>
+    </div>
+    <div id="info-panel">
+        <div class="asset-name">🖱️ HOVER OVER A NODE</div>
+        <div>Move your mouse over any glowing dot to see what's broken (I mean, "in scope").</div>
+        <div class="vuln-list" style="margin-top: 8px;">
+            <div class="vuln-item">💡 Tip: The redder the node, the closer to breach</div>
+        </div>
+    </div>
+    <div class="instruction">🎯 Drag to rotate | Scroll to zoom</div>
+
+    <!-- Three.js library -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+
+        // --- SETUP SCENE ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        scene.fog = new THREE.FogExp2(0x000000, 0.008);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(15, 8, 20);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.target.set(0, 0, 0);
+
+        // --- LIGHTS ---
+        const ambientLight = new THREE.AmbientLight(0x111111);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0x00ff41, 0.5, 30);
+        pointLight.position.set(5, 10, 7);
+        scene.add(pointLight);
+        const backLight = new THREE.PointLight(0x0066ff, 0.3);
+        backLight.position.set(-5, 5, -10);
+        scene.add(backLight);
+        
+        // Grid floor (matrix style)
+        const gridHelper = new THREE.GridHelper(40, 40, 0x00ff41, 0x004400);
+        gridHelper.position.y = -3;
+        scene.add(gridHelper);
+        
+        // Central glowing sphere (the "CORE")
+        const coreGeo = new THREE.SphereGeometry(1.2, 32, 32);
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0x00ff41, emissive: 0x006600, emissiveIntensity: 0.8 });
+        const coreSphere = new THREE.Mesh(coreGeo, coreMat);
+        coreSphere.castShadow = true;
+        scene.add(coreSphere);
+        
+        // Pulse ring
+        const ringGeo = new THREE.TorusGeometry(1.5, 0.05, 32, 100);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0x00ff41, emissive: 0x00ff41 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        scene.add(ring);
+        
+        // --- ASSET DATA (YOUR ATTACK SURFACE) ---
+        const assets = [
+            { name: "🔐 Firewall (Edge)", x: 3, z: 4, y: 0.5, risk: "medium", vulnerabilities: ["Firmware 6 months old", "Default admin? No... probably", "Rate limiting? LOL"], color: 0xffaa00 },
+            { name: "💾 Legacy File Server (2008)", x: -4, z: 3, y: 0.2, risk: "critical", vulnerabilities: ["Windows Server 2008 (EOL)", "No EDR", "Shared drive is wide open", "Backups? What backups?"], color: 0xff0000 },
+            { name: "👥 AD Domain Controller", x: -2, z: -4, y: 0.8, risk: "critical", vulnerabilities: ["Passwords haven't been rotated since 2021", "Kerberoasting possible", "Single DC"], color: 0xff0000 },
+            { name: "📧 Mail Gateway", x: 5, z: -2, y: 0.3, risk: "high", vulnerabilities: ["SPF/DKIM misconfigured", "Quarantine is full", "Phishing filter at 70%"], color: 0xff4400 },
+            { name: "🖥️ HR Workstation (Jen)", x: -3, z: -1, y: -0.5, risk: "high", vulnerabilities: ["Local admin rights", "Clicked phishing link last week", "No LAPS"], color: 0xff4400 },
+            { name: "☁️ AWS S3 (Public Bucket)", x: 6, z: 1, y: 0.1, risk: "critical", vulnerabilities: ["Bucket might be public", "Logging disabled", "Contains old backups"], color: 0xff0000 },
+            { name: "📡 VPN Concentrator", x: 1, z: 6, y: 0.4, risk: "medium", vulnerabilities: ["Old firmware", "Split tunneling enabled", "No MFA for some users"], color: 0xffaa00 },
+            { name: "🗄️ SQL Database (Customer Data)", x: -5, z: -3, y: 0.6, risk: "high", vulnerabilities: ["Default sa account?", "No encryption at rest", "Backup exposed"], color: 0xff4400 },
+            { name: "📱 MDM Server", x: 4, z: -5, y: 0.2, risk: "low", vulnerabilities: ["Some devices unmanaged", "Jailbroken phones detected"], color: 0x88ff88 },
+            { name: "🌐 Public Website", x: -6, z: 2, y: 0.3, risk: "medium", vulnerabilities: ["WordPress 6 months old", "Plugin vulnerabilities", "No WAF"], color: 0xffaa00 },
+            { name: "🧠 SIEM (Splunk)", x: 0, z: -6, y: 0.5, risk: "low", vulnerabilities: ["Log volume too high", "Alerts ignored", "Disk near full"], color: 0x88ff88 },
+            { name: "🎛️ OT/ICS Controller", x: 7, z: -1, y: -0.2, risk: "critical", vulnerabilities: ["Air-gapped? No.", "Default creds", "No segmentation"], color: 0xff0000 }
+        ];
+
+        const nodes = [];
+        
+        assets.forEach(asset => {
+            // Create sphere
+            const size = asset.risk === 'critical' ? 0.65 : (asset.risk === 'high' ? 0.55 : 0.45);
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+            const material = new THREE.MeshStandardMaterial({
+                color: asset.color,
+                emissive: asset.risk === 'critical' ? 0x330000 : 0x113300,
+                emissiveIntensity: 0.5,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(asset.x, asset.y, asset.z);
+            sphere.userData = { asset: asset };
+            scene.add(sphere);
+            
+            // Add glowing halo (point light or sprite)
+            const haloMat = new THREE.MeshBasicMaterial({ color: asset.color, transparent: true, opacity: 0.15 });
+            const halo = new THREE.Mesh(new THREE.SphereGeometry(size * 1.4, 16, 16), haloMat);
+            sphere.add(halo);
+            
+            // Add connection line to center
+            const points = [];
+            points.push(new THREE.Vector3(asset.x, asset.y, asset.z));
+            points.push(new THREE.Vector3(0, 0, 0));
+            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMat = new THREE.LineBasicMaterial({ color: asset.risk === 'critical' ? 0xff0000 : 0x00ff41, transparent: true, opacity: 0.3 });
+            const line = new THREE.Line(lineGeo, lineMat);
+            scene.add(line);
+            
+            nodes.push(sphere);
+        });
+        
+        // Add random floating particles (like digital dust)
+        const particleCount = 800;
+        const particlesGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i*3] = (Math.random() - 0.5) * 50;
+            particlePositions[i*3+1] = (Math.random() - 0.5) * 20;
+            particlePositions[i*3+2] = (Math.random() - 0.5) * 40;
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0x00ff41, size: 0.05, transparent: true, opacity: 0.4 });
+        const particles = new THREE.Points(particlesGeo, particleMat);
+        scene.add(particles);
+        
+        // --- RAYCASTER FOR HOVER ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        function onMouseMove(event) {
+            // Calculate mouse position in normalized coordinates
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(nodes);
+            
+            const infoPanel = document.getElementById('info-panel');
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                const asset = hit.object.userData.asset;
+                if (asset) {
+                    let riskClass = '';
+                    if (asset.risk === 'critical') riskClass = 'risk-critical';
+                    else if (asset.risk === 'high') riskClass = 'risk-high';
+                    else if (asset.risk === 'medium') riskClass = 'risk-medium';
+                    else riskClass = 'risk-low';
+                    
+                    let vulnHtml = '';
+                    asset.vulnerabilities.forEach(v => {
+                        vulnHtml += `<div class="vuln-item">⚠️ ${v}</div>`;
+                    });
+                    
+                    infoPanel.innerHTML = `
+                        <div class="asset-name">${asset.name}</div>
+                        <div class="risk-level ${riskClass}">${asset.risk.toUpperCase()} RISK</div>
+                        <div class="vuln-list">${vulnHtml}</div>
+                        <div style="font-size:0.6rem; margin-top:8px; color:#00ff4188;">🔍 This is your actual attack surface. Yes, it's messy.</div>
+                    `;
+                    
+                    // Pulse effect on hover
+                    hit.object.material.emissiveIntensity = 1.2;
+                    setTimeout(() => {
+                        if (hit.object.material) hit.object.material.emissiveIntensity = 0.5;
+                    }, 200);
+                }
+            } else {
+                infoPanel.innerHTML = `
+                    <div class="asset-name">🖱️ HOVER OVER ANY NODE</div>
+                    <div>Move your mouse over any glowing dot to see what's broken (I mean, "in scope").</div>
+                    <div class="vuln-list" style="margin-top: 8px;">
+                        <div class="vuln-item">💡 The redder the node, the closer to breach</div>
+                    </div>
+                `;
+            }
+        }
+        
+        window.addEventListener('mousemove', onMouseMove, false);
+        
+        // --- ANIMATION LOOP ---
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // Rotate ring
+            ring.rotation.x = Math.sin(time * 0.5) * 0.5;
+            ring.rotation.y = time;
+            ring.rotation.z = Math.cos(time * 0.3) * 0.3;
+            
+            // Pulse core
+            const scale = 1 + Math.sin(time * 5) * 0.03;
+            coreSphere.scale.set(scale, scale, scale);
+            
+            // Rotate particles slowly
+            particles.rotation.y += 0.002;
+            particles.rotation.x += 0.001;
+            
+            // Auto-rotate controls if idle
+            if (!controls.autoRotate) {
+                // After 5 seconds of no interaction, resume auto-rotate
+                // (simplified: just keep it on, user can drag to override)
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle resize
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Console easter egg
+        console.log("%c☠️ ATTACK SURFACE MAP LOADED", "color: #00ff41; font-size: 16px; font-family: monospace;");
+        console.log("%cHover over any node. Yes, that's your real infrastructure. No, it's not secure.", "color: #ff6600; font-size: 12px;");
+    </script>
+</body>
+</html>

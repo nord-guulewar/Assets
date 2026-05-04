@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IR Bot | Incident Response Stress Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #d97706;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #d97706, #dc2626);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subhead {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Stats panel */
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #1a1a1a;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            flex: 1;
+            text-align: center;
+            border-left: 3px solid #d97706;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Main card */
+        .incident-card {
+            background: #111111;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid #2a2a2a;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .severity.critical { background: #7f1d1d; color: #fca5a5; }
+        .severity.high { background: #78350f; color: #fdba74; }
+        .severity.medium { background: #451a03; color: #fde68a; }
+
+        .incident-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .incident-desc {
+            color: #9ca3af;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .choice-btn {
+            background: #1f2937;
+            border: 1px solid #374151;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: monospace;
+        }
+
+        .choice-btn:hover {
+            background: #2d3a4a;
+            border-color: #d97706;
+            transform: translateX(4px);
+        }
+
+        .choice-btn.disabled, .choice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            border-left: 4px solid #d97706;
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+
+        .reset-btn {
+            background: #dc2626;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .reset-btn:hover {
+            background: #b91c1c;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #4b5563;
+        }
+
+        .timer {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #d97706;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="/works.html" class="back-link">← Back to projects</a>
+        <h1>☠️ IR BOT</h1>
+        <div class="subhead">Incident Response Stress Test — Make the wrong choice? That's a paddlin'.</div>
+    </div>
+
+    <div class="stats-panel">
+        <div class="stat"><div class="stat-label">JOB SECURITY</div><div class="stat-value" id="jobSecurity">100</div></div>
+        <div class="stat"><div class="stat-label">TEAM MORALE</div><div class="stat-value" id="teamMorale">100</div></div>
+        <div class="stat"><div class="stat-label">INCIDENTS HANDLED</div><div class="stat-value" id="incidentCount">0</div></div>
+    </div>
+
+    <div class="incident-card" id="incidentCard">
+        <div class="timer" id="timer"></div>
+        <div id="severityBadge" class="severity critical">⚠️ CRITICAL</div>
+        <div class="incident-title" id="incidentTitle">Loading...</div>
+        <div class="incident-desc" id="incidentDesc"></div>
+        <div class="choices" id="choicesContainer"></div>
+        <div id="feedback" class="feedback" style="display: none;"></div>
+    </div>
+
+    <button class="reset-btn" id="resetBtn">💀 RESET — START OVER 💀</button>
+    <div class="footer">Dark humor included. No real SOC analysts were harmed. Probably.</div>
+</div>
+
+<script>
+    // ----------------------------- INCIDENT DATABASE -----------------------------
+    const incidents = [
+        {
+            title: "Ransomware on Finance Share Drive",
+            desc: "Finance team reports all Excel files are now .crypt0r. Backups? Haha, good one. The drive has 3TB of data. CEO is asking for ETA.",
+            severity: "critical",
+            choices: [
+                { text: "Isolate the share drive immediately — screw ongoing work.", effect: { job: -5, morale: -10, next: null }, feedback: "You isolated it. Finance hates you because they lost 4 hours of budget models. But the malware didn't spread. Worth it? Maybe." },
+                { text: "Let it run while you 'investigate' for 30 minutes.", effect: { job: -30, morale: -5, next: null }, feedback: "It spread to HR and Ops. The CEO now knows your name. Not in a good way." },
+                { text: "Call the CISO before doing anything.", effect: { job: -15, morale: 0, next: null }, feedback: "CISO is on a golf course. Voicemail. You wasted 10 minutes. Malware kept encrypting." }
+            ]
+        },
+        {
+            title: "Phishing Campaign — 200 Users Clicked",
+            desc: "Your phishing simulation accidentally went out to everyone. 200 people clicked. Legal wants to know if this is a 'real breach.' Also, someone already tweeted about it.",
+            severity: "high",
+            choices: [
+                { text: "Blame the intern and move on.", effect: { job: -20, morale: -20, next: null }, feedback: "Intern cries. Team morale drops. But hey, you survived. For now." },
+                { text: "Send a mass email: 'Please ignore that email. It was a test.'", effect: { job: -10, morale: -5, next: null }, feedback: "Half the company didn't read it. The other half now thinks you're incompetent. Classic." },
+                { text: "Own it. Send a mea culpa with security tips.", effect: { job: -5, morale: 5, next: null }, feedback: "Surprisingly effective. People respect honesty. You look human. Rare in security." }
+            ]
+        },
+        {
+            title: "CISO's Laptop Stolen from Car",
+            desc: "CISO left laptop in backseat. Car was stolen. Laptop had access to everything. No BitLocker. No tracking. CISO says 'oops'.",
+            severity: "critical",
+            choices: [
+                { text: "Remote wipe immediately (if you can).", effect: { job: 10, morale: 0, next: null }, feedback: "Wipe succeeded. CISO is embarrassed but grateful. Job security up slightly." },
+                { text: "Tell legal before doing anything.", effect: { job: -25, morale: -10, next: null }, feedback: "Legal spends 4 hours discussing liability. Laptop is long gone. Data is probably in Russia by now." },
+                { text: "Pretend it didn't happen.", effect: { job: -50, morale: -15, next: null }, feedback: "It definitely happened. And now the breach disclosure clock is ticking. Bold strategy." }
+            ]
+        },
+        {
+            title: "Alert Fatigue — Real Incident Missed",
+            desc: "Your SIEM generated 10,000 alerts today. You ignored most. Now legal says customer data was exfiltrated 6 days ago. Logs show the alert was there.",
+            severity: "critical",
+            choices: [
+                { text: "Blame the SIEM configuration.", effect: { job: -30, morale: -5, next: null }, feedback: "Management buys it... barely. But now they're auditing all your rules. Fun." },
+                { text: "Propose a 24/7 SOC expansion (hire more people).", effect: { job: 15, morale: 20, next: null }, feedback: "They say no. But they respect the hustle. Also you get a 'most improved' sticker." },
+                { text: "Automate alert triage with a SOAR playbook.", effect: { job: 25, morale: 10, next: null }, feedback: "Management loves automation. You look like a genius. Also you fix the problem. Hero." }
+            ]
+        },
+        {
+            title: "Zero-Day Hits Your Edge Firewall",
+            desc: "Vendor just announced a critical zero-day affecting your firewall. No patch yet. Exploit is public. CISO is asking for 'risk assessment' in 10 minutes.",
+            severity: "critical",
+            choices: [
+                { text: "Block all inbound traffic until patch.", effect: { job: -20, morale: -25, next: null }, feedback: "Company goes offline. Sales hates you. But you're safe from the exploit. Kinda." },
+                { text: "Monitor logs and pray.", effect: { job: -40, morale: -10, next: null }, feedback: "You got lucky this time. But management found out you 'waited and saw.' Not great." },
+                { text: "Implement vendor workaround and escalate monitoring.", effect: { job: 15, morale: 5, next: null }, feedback: "Solid IR. Workaround bought time. Patch came next day. You get a mention in the post-mortem." }
+            ]
+        }
+    ];
+
+    // ----------------------------- STATE -----------------------------
+    let currentIncidentIndex = 0;
+    let jobSecurity = 100;
+    let teamMorale = 100;
+    let incidentCount = 0;
+    let gameActive = true;
+    let timerInterval = null;
+    let timeLeft = 15;
+    let waitingForChoice = false;
+
+    // Shuffle incidents for replayability
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    let shuffledIncidents = shuffleArray([...incidents]);
+
+    // ----------------------------- UI UPDATES -----------------------------
+    function updateStatsUI() {
+        document.getElementById('jobSecurity').textContent = Math.max(0, jobSecurity);
+        document.getElementById('teamMorale').textContent = Math.max(0, teamMorale);
+        document.getElementById('incidentCount').textContent = incidentCount;
+
+        // Color coding
+        const jobEl = document.getElementById('jobSecurity');
+        const moraleEl = document.getElementById('teamMorale');
+        if (jobSecurity < 30) jobEl.style.color = '#ef4444';
+        else if (jobSecurity < 60) jobEl.style.color = '#f59e0b';
+        else jobEl.style.color = '#4ade80';
+
+        if (teamMorale < 30) moraleEl.style.color = '#ef4444';
+        else if (teamMorale < 60) moraleEl.style.color = '#f59e0b';
+        else moraleEl.style.color = '#4ade80';
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function startTimer() {
+        stopTimer();
+        if (!gameActive) return;
+        timeLeft = 15;
+        const timerEl = document.getElementById('timer');
+        timerEl.innerHTML = `⏱️ DECISION TIME: ${timeLeft}s — Clock's ticking...`;
+        timerInterval = setInterval(() => {
+            if (!gameActive || waitingForChoice) return;
+            timeLeft--;
+            timerEl.innerHTML = `⏱️ DECISION TIME: ${timeLeft}s — Clock's ticking...`;
+            if (timeLeft <= 0) {
+                stopTimer();
+                timerEl.innerHTML = `⏰ TIME'S UP. You hesitated. That's a choice in itself.`;
+                handleTimeout();
+            }
+        }, 1000);
+    }
+
+    function handleTimeout() {
+        if (!gameActive) return;
+        gameActive = false;
+        waitingForChoice = true;
+        const feedbackDiv = document.getElementById('feedback');
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.innerHTML = `💀 <strong>TIMEOUT — INDECISION KILLS</strong><br>You froze. In the real world, that's a breach. Job security -30, morale -20.<br><br><em>Next time, act faster. Or don't. Not my career.</em>`;
+        jobSecurity = Math.max(0, jobSecurity - 30);
+        teamMorale = Math.max(0, teamMorale - 20);
+        updateStatsUI();
+        document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
+        setTimeout(() => {
+            nextIncident();
+        }, 2500);
+    }
+
+    function handleChoice(effect, feedbackText, choiceIndex) {
+        if (!gameActive) return;
+        stopTimer();
+        gameActive = false;
+        waitingForChoice = true;
+
+        // Apply effects
+        jobSecurity = Math.max(0, Math.min(100, jobSecurity + (effect.job || 0)));
+        teamMorale = Math.max(0, Math.min(100, teamMorale + (effect.morale || 0)));
+        incidentCount++;
+        updateStatsUI();
+
+        // Show feedback
+        const feedbackDiv = document.getElementById('feedback');
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.innerHTML = `💬 <strong>OUTCOME:</strong><br>${feedbackText}<br><br>📉 Job Security: ${effect.job >= 0 ? '+' : ''}${effect.job} | 💔 Morale: ${effect.morale >= 0 ? '+' : ''}${effect.morale}`;
+
+        // Disable choices
+        document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
+
+        // Check game over
+        if (jobSecurity <= 0) {
+            feedbackDiv.innerHTML += `<br><br>💀 <strong>GAME OVER.</strong> You've been fired. The CISO personally escorted you out. Update your resume.`;
+            document.getElementById('timer').innerHTML = `🏆 FINAL SCORE: ${incidentCount} incidents handled before termination.`;
+            return;
+        }
+        if (teamMorale <= 0) {
+            feedbackDiv.innerHTML += `<br><br>💀 <strong>GAME OVER.</strong> Your team mutinied. They now work for the competitor. You're alone.`;
+            document.getElementById('timer').innerHTML = `🏆 FINAL SCORE: ${incidentCount} incidents before revolt.`;
+            return;
+        }
+
+        // Next incident
+        setTimeout(() => {
+            nextIncident();
+        }, 2800);
+    }
+
+    function nextIncident() {
+        currentIncidentIndex++;
+        if (currentIncidentIndex >= shuffledIncidents.length) {
+            // Game complete
+            document.getElementById('incidentTitle').innerHTML = "🏆 SIMULATION COMPLETE";
+            document.getElementById('incidentDesc').innerHTML = `You handled ${incidentCount} major incidents. Final job security: ${jobSecurity}. Final morale: ${teamMorale}.<br><br>${jobSecurity > 70 ? "You're getting promoted. Probably." : jobSecurity > 40 ? "You survived. Barely." : "Start applying elsewhere."}`;
+            document.getElementById('choicesContainer').innerHTML = '';
+            document.getElementById('severityBadge').style.display = 'none';
+            stopTimer();
+            gameActive = false;
+            return;
+        }
+
+        // Load next incident
+        loadIncident(shuffledIncidents[currentIncidentIndex]);
+    }
+
+    function loadIncident(incident) {
+        gameActive = true;
+        waitingForChoice = false;
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('severityBadge').style.display = 'inline-block';
+        document.getElementById('severityBadge').className = `severity ${incident.severity}`;
+        document.getElementById('severityBadge').innerHTML = incident.severity === 'critical' ? '⚠️ CRITICAL' : (incident.severity === 'high' ? '🔥 HIGH' : '📌 MEDIUM');
+        document.getElementById('incidentTitle').innerHTML = incident.title;
+        document.getElementById('incidentDesc').innerHTML = incident.desc;
+
+        const choicesContainer = document.getElementById('choicesContainer');
+        choicesContainer.innerHTML = '';
+        incident.choices.forEach((choice, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerHTML = `${String.fromCharCode(65+idx)}. ${choice.text}`;
+            btn.onclick = () => handleChoice(choice.effect, choice.feedback, idx);
+            choicesContainer.appendChild(btn);
+        });
+
+        startTimer();
+    }
+
+    function resetGame() {
+        stopTimer();
+        currentIncidentIndex = 0;
+        jobSecurity = 100;
+        teamMorale = 100;
+        incidentCount = 0;
+        gameActive = true;
+        waitingForChoice = false;
+        shuffledIncidents = shuffleArray([...incidents]);
+        updateStatsUI();
+        loadIncident(shuffledIncidents[0]);
+    }
+
+    document.getElementById('resetBtn').onclick = resetGame;
+
+    // Start
+    resetGame();
+</script>
+</body>
+</html>
