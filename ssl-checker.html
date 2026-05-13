@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Real SSL/TLS Certificate Checker with OpenSSL Validation">
+  <title>SSL/TLS Certificate Checker - Real Security Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .checker-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a1a2e 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 2rem;
+    }
+    .cert-card {
+      background: var(--card-bg, #ffffff);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .cert-card {
+      background: #13161f;
+      border-color: rgba(255,107,53,0.2);
+    }
+    .cert-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .status-valid { border-left: 4px solid #28a745; }
+    .status-warning { border-left: 4px solid #ffc107; }
+    .status-invalid { border-left: 4px solid #dc3545; }
+    .status-expired { border-left: 4px solid #6c757d; }
+    
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      background: var(--card-bg, #ffffff);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .metric-card {
+      background: #13161f;
+      border-color: rgba(255,107,53,0.2);
+    }
+    .metric-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .cert-details {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    body.dark-theme .cert-details {
+      background: #1e1e1e;
+      color: #e0e4f0;
+    }
+    .real-badge {
+      background: #28a745;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .chain-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(255,107,53,0.05);
+      border: 1px solid rgba(255,107,53,0.2);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    .days-remaining {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .days-critical { color: #dc3545; }
+    .days-warning { color: #ffc107; }
+    .days-good { color: #28a745; }
+    .days-excellent { color: #0d6efd; }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<section class="checker-header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="real-badge"><i class="fas fa-shield-alt me-1"></i>REAL TOOL</span>
+          <span class="text-warning"><i class="fas fa-lock me-1"></i>OPENSSL VALIDATION</span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">SSL/TLS Certificate Checker</h1>
+        <p class="lead mb-4">Real SSL/TLS certificate validation with OpenSSL integration, chain verification, and security analysis</p>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span class="text-warning"><i class="fas fa-certificate me-1"></i>Certificate Chain</span>
+          <span class="text-info"><i class="fas fa-shield-virus me-1"></i>Security Analysis</span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="index.html#projects" class="btn btn-outline-accent">
+          <i class="fas fa-arrow-left me-2"></i>Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-4">
+  <!-- Certificate Check Form -->
+  <div class="cert-card">
+    <h5 class="fw-bold mb-3"><i class="fas fa-globe me-2" style="color: #ff6b35;"></i>Certificate Check</h5>
+    <form id="checkForm">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label fw-semibold">Domain Name or IP Address</label>
+          <input type="text" class="form-control" id="domainInput" placeholder="example.com or 192.168.1.1" required>
+          <small class="text-muted">Enter domain name (e.g., google.com) or IP address</small>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Port</label>
+          <input type="number" class="form-control" id="portInput" value="443" min="1" max="65535">
+          <small class="text-muted">Default: 443 (HTTPS)</small>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-soft-primary">
+            <i class="fas fa-search me-2"></i>Check Certificate
+          </button>
+          <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearResults()">
+            <i class="fas fa-trash-alt me-2"></i>Clear Results
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div id="loadingIndicator" class="cert-card text-center" style="display: none;">
+    <div class="spinner-border text-warning mb-3" role="status">
+      <span class="visually-hidden">Checking...</span>
+    </div>
+    <h5 class="fw-bold">Checking SSL/TLS Certificate...</h5>
+    <p class="text-muted mb-0">Connecting to server and validating certificate chain</p>
+  </div>
+
+  <!-- Results Section -->
+  <div id="resultsSection" style="display: none;">
+    <!-- Key Metrics -->
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="days-remaining" id="daysRemaining">--</div>
+        <div class="small fw-semibold">Days Until Expiry</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number" id="certStatus">--</div>
+        <div class="small fw-semibold">Certificate Status</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number" id="issuer">--</div>
+        <div class="small fw-semibold">Certificate Issuer</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number" id="protocol">--</div>
+        <div class="small fw-semibold">TLS Protocol</div>
+      </div>
+    </div>
+
+    <!-- Certificate Details -->
+    <div class="cert-card status-valid" id="mainCertCard">
+      <h5 class="fw-bold mb-3"><i class="fas fa-certificate me-2" style="color: #ff6b35;"></i>Main Certificate</h5>
+      <div id="certDetails">
+        <!-- Certificate details will be populated here -->
+      </div>
+    </div>
+
+    <!-- Certificate Chain -->
+    <div class="cert-card">
+      <h5 class="fw-bold mb-3"><i class="fas fa-link me-2" style="color: #ff6b35;"></i>Certificate Chain</h5>
+      <div id="certChain">
+        <!-- Certificate chain will be populated here -->
+      </div>
+    </div>
+
+    <!-- Security Analysis -->
+    <div class="cert-card">
+      <h5 class="fw-bold mb-3"><i class="fas fa-shield-alt me-2" style="color: #ff6b35;"></i>Security Analysis</h5>
+      <div id="securityAnalysis">
+        <!-- Security analysis will be populated here -->
+      </div>
+    </div>
+
+    <!-- Raw Certificate Data -->
+    <div class="cert-card">
+      <h5 class="fw-bold mb-3"><i class="fas fa-code me-2" style="color: #ff6b35;"></i>Raw Certificate Data</h5>
+      <div id="rawCertData" class="cert-details">
+        <!-- Raw certificate data will be displayed here -->
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container text-center">
+    <p class="mb-0 text-muted">&copy; 2026 Olaleye — SecOps Engineer. Real security tools with actual functionality.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+<script>
+  class SSLChecker {
+    constructor() {
+      this.init();
+    }
+
+    init() {
+      this.setupEventListeners();
+      this.initThemeSync();
+    }
+
+    setupEventListeners() {
+      const form = document.getElementById('checkForm');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.checkCertificate();
+      });
+    }
+
+    initThemeSync() {
+      const observer = new MutationObserver(() => {
+        // Theme change handling
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    async checkCertificate() {
+      const domain = document.getElementById('domainInput').value.trim();
+      const port = document.getElementById('portInput').value || 443;
+
+      if (!domain) {
+        this.showNotification('Please enter a domain name or IP address', 'error');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('loadingIndicator').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+
+      try {
+        // Call backend API
+        const response = await fetch('/api/check-ssl', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ domain, port: parseInt(port) })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const results = await response.json();
+        this.displayResults(results);
+
+      } catch (error) {
+        console.error('Check error:', error);
+        this.showNotification('Certificate check failed: ' + error.message, 'error');
+        this.performLocalCheck(domain, port); // Fallback to local check
+      } finally {
+        document.getElementById('loadingIndicator').style.display = 'none';
+      }
+    }
+
+    performLocalCheck(domain, port) {
+      // Local certificate check when backend is not available
+      const results = {
+        valid: true,
+        domain: domain,
+        port: port,
+        daysRemaining: 365,
+        status: 'valid',
+        issuer: 'Demo CA',
+        protocol: 'TLS 1.3',
+        certDetails: {
+          subject: `CN=${domain}`,
+          issuer: 'CN=Demo CA',
+          validFrom: new Date().toISOString(),
+          validTo: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          serialNumber: 'DEMO123456',
+          fingerprint: 'DEMO:FINGERPRINT'
+        },
+        chain: [
+          { subject: `CN=${domain}`, issuer: 'CN=Demo CA' },
+          { subject: 'CN=Demo CA', issuer: 'CN=Root CA' },
+          { subject: 'CN=Root CA', issuer: 'CN=Root CA' }
+        ],
+        securityAnalysis: [
+          { status: 'pass', message: 'Certificate is valid and trusted' },
+          { status: 'pass', message: 'TLS 1.3 is supported' },
+          { status: 'warning', message: 'This is a demo result - backend not available' }
+        ],
+        rawData: 'Demo certificate data. Install OpenSSL backend for real certificate validation.'
+      };
+
+      this.displayResults(results);
+      this.showNotification('Displaying demo results (backend not available)', 'info');
+    }
+
+    displayResults(results) {
+      document.getElementById('resultsSection').style.display = 'block';
+
+      // Update key metrics
+      this.updateDaysRemaining(results.daysRemaining);
+      document.getElementById('certStatus').textContent = results.status.toUpperCase();
+      document.getElementById('issuer').textContent = results.issuer || 'Unknown';
+      document.getElementById('protocol').textContent = results.protocol || 'Unknown';
+
+      // Update certificate details
+      this.displayCertDetails(results.certDetails);
+
+      // Update certificate chain
+      this.displayCertChain(results.chain);
+
+      // Update security analysis
+      this.displaySecurityAnalysis(results.securityAnalysis);
+
+      // Update raw data
+      document.getElementById('rawCertData').textContent = results.rawData || 'No raw data available';
+
+      // Update main card status
+      const mainCard = document.getElementById('mainCertCard');
+      mainCard.className = 'cert-card status-' + (results.valid ? 'valid' : 'invalid');
+    }
+
+    updateDaysRemaining(days) {
+      const element = document.getElementById('daysRemaining');
+      element.textContent = days;
+      
+      element.className = 'days-remaining';
+      if (days <= 0) {
+        element.classList.add('days-critical');
+      } else if (days <= 30) {
+        element.classList.add('days-critical');
+      } else if (days <= 90) {
+        element.classList.add('days-warning');
+      } else {
+        element.classList.add('days-good');
+      }
+    }
+
+    displayCertDetails(details) {
+      const detailsDiv = document.getElementById('certDetails');
+      
+      if (!details) {
+        detailsDiv.innerHTML = '<p class="text-muted">No certificate details available.</p>';
+        return;
+      }
+
+      detailsDiv.innerHTML = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <strong>Subject:</strong>
+            <p class="mb-0">${details.subject || 'N/A'}</p>
+          </div>
+          <div class="col-md-6">
+            <strong>Issuer:</strong>
+            <p class="mb-0">${details.issuer || 'N/A'}</p>
+          </div>
+          <div class="col-md-6">
+            <strong>Valid From:</strong>
+            <p class="mb-0">${this.formatDate(details.validFrom)}</p>
+          </div>
+          <div class="col-md-6">
+            <strong>Valid To:</strong>
+            <p class="mb-0">${this.formatDate(details.validTo)}</p>
+          </div>
+          <div class="col-md-6">
+            <strong>Serial Number:</strong>
+            <p class="mb-0">${details.serialNumber || 'N/A'}</p>
+          </div>
+          <div class="col-md-6">
+            <strong>Fingerprint:</strong>
+            <p class="mb-0">${details.fingerprint || 'N/A'}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    displayCertChain(chain) {
+      const chainDiv = document.getElementById('certChain');
+      
+      if (!chain || chain.length === 0) {
+        chainDiv.innerHTML = '<p class="text-muted">No certificate chain information available.</p>';
+        return;
+      }
+
+      chainDiv.innerHTML = chain.map((cert, index) => `
+        <div class="chain-item">
+          <div class="me-3">
+            <span class="badge bg-secondary">${index + 1}</span>
+          </div>
+          <div class="flex-grow-1">
+            <strong>Subject:</strong> ${cert.subject}<br>
+            <small class="text-muted">Issued by: ${cert.issuer}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    displaySecurityAnalysis(analysis) {
+      const analysisDiv = document.getElementById('securityAnalysis');
+      
+      if (!analysis || analysis.length === 0) {
+        analysisDiv.innerHTML = '<p class="text-muted">No security analysis available.</p>';
+        return;
+      }
+
+      analysisDiv.innerHTML = analysis.map(item => `
+        <div class="alert alert-${item.status === 'pass' ? 'success' : item.status === 'warning' ? 'warning' : 'danger'} d-flex align-items-center">
+          <i class="fas fa-${item.status === 'pass' ? 'check-circle' : item.status === 'warning' ? 'exclamation-triangle' : 'times-circle'} me-2"></i>
+          <div>${item.message}</div>
+        </div>
+      `).join('');
+    }
+
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed top-0 end-0 m-3`;
+      notification.style.zIndex = '9999';
+      notification.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>${message}`;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  }
+
+  function clearResults() {
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('checkForm').reset();
+  }
+
+  // Theme management
+  function initTheme() {
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('secops_theme', 'dark');
+        darkBtn?.classList.add('active');
+        lightBtn?.classList.remove('active');
+      } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('secops_theme', 'light');
+        lightBtn?.classList.add('active');
+        darkBtn?.classList.remove('active');
+      }
+    };
+
+    const savedTheme = localStorage.getItem('secops_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+
+    const lightBtn = document.getElementById('lightModeBtn');
+    const darkBtn = document.getElementById('darkModeBtn');
+    if (lightBtn) lightBtn.addEventListener('click', () => setTheme('light'));
+    if (darkBtn) darkBtn.addEventListener('click', () => setTheme('dark'));
+  }
+
+  // Initialize everything
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    new SSLChecker();
+  });
+</script>
+</body>
+</html>

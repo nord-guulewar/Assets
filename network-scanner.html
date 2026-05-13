@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Real Network Vulnerability Scanner with Nmap Integration">
+  <title>Network Vulnerability Scanner - Real Security Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .scanner-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a1a2e 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 2rem;
+    }
+    .scan-result {
+      background: var(--card-bg, #ffffff);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .scan-result {
+      background: #13161f;
+      border-color: rgba(255,107,53,0.2);
+    }
+    .vulnerability-high {
+      border-left: 4px solid #dc3545;
+      background: rgba(220, 53, 69, 0.05);
+    }
+    .vulnerability-medium {
+      border-left: 4px solid #fd7e14;
+      background: rgba(253, 126, 20, 0.05);
+    }
+    .vulnerability-low {
+      border-left: 4px solid #ffc107;
+      background: rgba(255, 193, 7, 0.05);
+    }
+    .scan-progress {
+      display: none;
+      background: rgba(255,107,53,0.1);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .port-status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .port-open { background: #dc3545; color: white; }
+    .port-closed { background: #6c757d; color: white; }
+    .port-filtered { background: #fd7e14; color: white; }
+    .nmap-output {
+      background: #1e1e1e;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .real-badge {
+      background: #28a745;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<section class="scanner-header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="real-badge"><i class="fas fa-shield-alt me-1"></i>REAL TOOL</span>
+          <span class="text-warning"><i class="fas fa-tools me-1"></i>NMAP INTEGRATION</span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Network Vulnerability Scanner</h1>
+        <p class="lead mb-4">Real network scanning with Nmap integration, vulnerability detection, and security assessment</p>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>Requires Nmap installed</span>
+          <span class="text-info"><i class="fas fa-terminal me-1"></i>Real command execution</span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="index.html#projects" class="btn btn-outline-accent">
+          <i class="fas fa-arrow-left me-2"></i>Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-4">
+  <!-- Scanner Controls -->
+  <div class="scan-result">
+    <h5 class="fw-bold mb-3"><i class="fas fa-network-wired me-2" style="color: #ff6b35;"></i>Scanner Configuration</h5>
+    <form id="scanForm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Target IP/Hostname</label>
+          <input type="text" class="form-control" id="target" placeholder="192.168.1.1 or example.com" required>
+          <small class="text-muted">Enter IP address, hostname, or IP range (e.g., 192.168.1.1-100)</small>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Scan Type</label>
+          <select class="form-select" id="scanType">
+            <option value="basic">Basic Port Scan (Fast)</option>
+            <option value="comprehensive">Comprehensive Scan</option>
+            <option value="vulnerability">Vulnerability Detection</option>
+            <option value="stealth">Stealth Scan (SYN)</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Port Range</label>
+          <select class="form-select" id="portRange">
+            <option value="common">Common Ports (Top 1000)</option>
+            <option value="all">All Ports (1-65535)</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Custom Ports (if selected)</label>
+          <input type="text" class="form-control" id="customPorts" placeholder="80,443,22,21,25" disabled>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-soft-primary">
+            <i class="fas fa-search me-2"></i>Start Scan
+          </button>
+          <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearResults()">
+            <i class="fas fa-trash-alt me-2"></i>Clear Results
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Scan Progress -->
+  <div id="scanProgress" class="scan-progress">
+    <div class="spinner-border text-warning mb-3" role="status">
+      <span class="visually-hidden">Scanning...</span>
+    </div>
+    <h5 class="fw-bold">Scanning Target...</h5>
+    <p class="text-muted mb-0">Running Nmap scan. This may take several minutes depending on the target.</p>
+    <div class="mt-3">
+      <div class="progress" style="height: 6px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="resultsSection" style="display: none;">
+    <div class="scan-result">
+      <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2" style="color: #ff6b35;"></i>Scan Summary</h5>
+      <div id="scanSummary" class="row g-3">
+        <!-- Summary will be populated here -->
+      </div>
+    </div>
+
+    <div class="scan-result">
+      <h5 class="fw-bold mb-3"><i class="fas fa-shield-virus me-2" style="color: #ff6b35;"></i>Vulnerabilities Found</h5>
+      <div id="vulnerabilities">
+        <!-- Vulnerabilities will be populated here -->
+      </div>
+    </div>
+
+    <div class="scan-result">
+      <h5 class="fw-bold mb-3"><i class="fas fa-network-wired me-2" style="color: #ff6b35;"></i>Open Ports</h5>
+      <div id="openPorts">
+        <!-- Port results will be populated here -->
+      </div>
+    </div>
+
+    <div class="scan-result">
+      <h5 class="fw-bold mb-3"><i class="fas fa-terminal me-2" style="color: #ff6b35;"></i>Raw Nmap Output</h5>
+      <div id="nmapOutput" class="nmap-output">
+        <!-- Nmap output will be displayed here -->
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container text-center">
+    <p class="mb-0 text-muted">&copy; 2026 Olaleye — SecOps Engineer. Real security tools with actual functionality.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+<script>
+  class NetworkScanner {
+    constructor() {
+      this.init();
+    }
+
+    init() {
+      this.setupEventListeners();
+      this.initThemeSync();
+    }
+
+    setupEventListeners() {
+      const form = document.getElementById('scanForm');
+      const portRange = document.getElementById('portRange');
+      const customPorts = document.getElementById('customPorts');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.startScan();
+      });
+
+      portRange.addEventListener('change', () => {
+        customPorts.disabled = portRange.value !== 'custom';
+        if (portRange.value !== 'custom') {
+          customPorts.value = '';
+        }
+      });
+    }
+
+    initThemeSync() {
+      const observer = new MutationObserver(() => {
+        // Theme change handling
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    async startScan() {
+      const target = document.getElementById('target').value;
+      const scanType = document.getElementById('scanType').value;
+      const portRange = document.getElementById('portRange').value;
+      const customPorts = document.getElementById('customPorts').value;
+
+      if (!target) {
+        this.showNotification('Please enter a target IP or hostname', 'error');
+        return;
+      }
+
+      // Show progress
+      document.getElementById('scanProgress').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+
+      try {
+        // Call the backend API
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            target,
+            scanType,
+            portRange,
+            customPorts: portRange === 'custom' ? customPorts : undefined
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const results = await response.json();
+        this.displayResults(results);
+
+      } catch (error) {
+        console.error('Scan error:', error);
+        this.showNotification('Scan failed: ' + error.message, 'error');
+        this.showMockResults(target); // Fallback to mock results
+      } finally {
+        document.getElementById('scanProgress').style.display = 'none';
+      }
+    }
+
+    displayResults(results) {
+      document.getElementById('resultsSection').style.display = 'block';
+
+      // Display summary
+      this.displaySummary(results.summary);
+      
+      // Display vulnerabilities
+      this.displayVulnerabilities(results.vulnerabilities);
+      
+      // Display open ports
+      this.displayPorts(results.ports);
+      
+      // Display raw output
+      document.getElementById('nmapOutput').textContent = results.rawOutput || 'No raw output available';
+    }
+
+    displaySummary(summary) {
+      const summaryDiv = document.getElementById('scanSummary');
+      summaryDiv.innerHTML = `
+        <div class="col-md-3">
+          <div class="text-center">
+            <div class="metric-number text-danger">${summary.openPorts || 0}</div>
+            <div class="small fw-semibold">Open Ports</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-center">
+            <div class="metric-number text-warning">${summary.vulnerabilities || 0}</div>
+            <div class="small fw-semibold">Vulnerabilities</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-center">
+            <div class="metric-number text-info">${summary.services || 0}</div>
+            <div class="small fw-semibold">Services</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-center">
+            <div class="metric-number text-success">${summary.scanTime || '0s'}</div>
+            <div class="small fw-semibold">Scan Time</div>
+          </div>
+        </div>
+      `;
+    }
+
+    displayVulnerabilities(vulnerabilities) {
+      const vulnDiv = document.getElementById('vulnerabilities');
+      
+      if (!vulnerabilities || vulnerabilities.length === 0) {
+        vulnDiv.innerHTML = '<p class="text-muted">No vulnerabilities detected.</p>';
+        return;
+      }
+
+      vulnDiv.innerHTML = vulnerabilities.map(vuln => `
+        <div class="scan-result vulnerability-${vuln.severity}">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="fw-bold">${vuln.name}</h6>
+              <p class="mb-1">${vuln.description}</p>
+              <small class="text-muted">CVSS Score: ${vuln.cvss || 'N/A'} | Port: ${vuln.port}</small>
+            </div>
+            <span class="port-status vulnerability-${vuln.severity}">${vuln.severity.toUpperCase()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    displayPorts(ports) {
+      const portsDiv = document.getElementById('openPorts');
+      
+      if (!ports || ports.length === 0) {
+        portsDiv.innerHTML = '<p class="text-muted">No open ports found.</p>';
+        return;
+      }
+
+      portsDiv.innerHTML = ports.map(port => `
+        <div class="scan-result">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="fw-bold">Port ${port.port}/${port.protocol}</h6>
+              <p class="mb-0">${port.service || 'Unknown'} - ${port.product || ''} ${port.version || ''}</p>
+            </div>
+            <span class="port-status port-${port.state}">${port.state}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    showMockResults(target) {
+      // Fallback mock results for demonstration
+      const mockResults = {
+        summary: {
+          openPorts: 3,
+          vulnerabilities: 2,
+          services: 3,
+          scanTime: '45s'
+        },
+        vulnerabilities: [
+          {
+            name: 'SSH Weak Encryption',
+            description: 'SSH server allows weak encryption algorithms',
+            severity: 'medium',
+            cvss: '5.3',
+            port: 22
+          },
+          {
+            name: 'HTTP Server Version Disclosure',
+            description: 'Web server reveals version information',
+            severity: 'low',
+            cvss: '3.1',
+            port: 80
+          }
+        ],
+        ports: [
+          { port: 22, protocol: 'tcp', state: 'open', service: 'ssh', product: 'OpenSSH', version: '7.4' },
+          { port: 80, protocol: 'tcp', state: 'open', service: 'http', product: 'Apache', version: '2.4.29' },
+          { port: 443, protocol: 'tcp', state: 'open', service: 'https', product: 'Apache', version: '2.4.29' }
+        ],
+        rawOutput: `Starting Nmap 7.80 ( https://nmap.org ) at 2026-05-12 21:40 UTC
+Nmap scan report for ${target}
+Host is up (0.045s latency).
+Not shown: 997 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 7.4 (protocol 2.0)
+80/tcp   open  http    Apache httpd 2.4.29
+443/tcp  open  https   Apache httpd 2.4.29
+
+Nmap done: 1 IP address (1 host up) scanned in 45.23 seconds`
+      };
+
+      this.displayResults(mockResults);
+      this.showNotification('Displaying demo results (backend not available)', 'info');
+    }
+
+    showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed top-0 end-0 m-3`;
+      notification.style.zIndex = '9999';
+      notification.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>${message}`;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  }
+
+  function clearResults() {
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('scanForm').reset();
+  }
+
+  // Theme management
+  function initTheme() {
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('secops_theme', 'dark');
+        darkBtn?.classList.add('active');
+        lightBtn?.classList.remove('active');
+      } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('secops_theme', 'light');
+        lightBtn?.classList.add('active');
+        darkBtn?.classList.remove('active');
+      }
+    };
+
+    const savedTheme = localStorage.getItem('secops_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+
+    const lightBtn = document.getElementById('lightModeBtn');
+    const darkBtn = document.getElementById('darkModeBtn');
+    if (lightBtn) lightBtn.addEventListener('click', () => setTheme('light'));
+    if (darkBtn) darkBtn.addEventListener('click', () => setTheme('dark'));
+  }
+
+  // Initialize everything
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    new NetworkScanner();
+  });
+</script>
+</body>
+</html>

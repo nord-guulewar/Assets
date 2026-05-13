@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Real Log Analysis Tool with File Processing and Regex Parsing">
+  <title>Log Analysis Tool - Real Security Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .analyzer-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a1a2e 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 2rem;
+    }
+    .log-entry {
+      background: var(--card-bg, #ffffff);
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .log-entry {
+      background: #13161f;
+      border-color: rgba(255,107,53,0.2);
+    }
+    .log-entry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .severity-critical { border-left: 4px solid #dc3545; }
+    .severity-high { border-left: 4px solid #fd7e14; }
+    .severity-medium { border-left: 4px solid #ffc107; }
+    .severity-low { border-left: 4px solid #28a745; }
+    .severity-info { border-left: 4px solid #17a2b8; }
+    
+    .pattern-card {
+      background: rgba(255,107,53,0.05);
+      border: 1px solid rgba(255,107,53,0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .pattern-match {
+      background: rgba(40, 167, 69, 0.1);
+      border-radius: 4px;
+      padding: 0.2rem 0.4rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .file-drop-zone {
+      border: 2px dashed #ff6b35;
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .file-drop-zone:hover, .file-drop-zone.drag-over {
+      background: rgba(255,107,53,0.05);
+      border-color: #e55a2b;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card-bg, #ffffff);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    body.dark-theme .stat-card {
+      background: #13161f;
+      border-color: rgba(255,107,53,0.2);
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .log-preview {
+      background: #1e1e1e;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .real-badge {
+      background: #28a745;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Olaleye<span style="color:#ff6b35;">.</span></a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <i class="fas fa-bars" style="color: #ff6b35; font-size: 1.6rem;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+        <li class="nav-item">
+          <div class="theme-switch ms-2 ms-lg-3">
+            <button class="theme-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<section class="analyzer-header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="real-badge"><i class="fas fa-shield-alt me-1"></i>REAL TOOL</span>
+          <span class="text-warning"><i class="fas fa-file-alt me-1"></i>FILE PROCESSING</span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Log Analysis Tool</h1>
+        <p class="lead mb-4">Real log file processing with regex pattern matching, anomaly detection, and security event analysis</p>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span class="text-warning"><i class="fas fa-search me-1"></i>Regex Pattern Matching</span>
+          <span class="text-info"><i class="fas fa-chart-line me-1"></i>Real File Analysis</span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="index.html#projects" class="btn btn-outline-accent">
+          <i class="fas fa-arrow-left me-2"></i>Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-4">
+  <!-- File Upload Section -->
+  <div class="log-entry">
+    <h5 class="fw-bold mb-3"><i class="fas fa-upload me-2" style="color: #ff6b35;"></i>Upload Log File</h5>
+    <div class="file-drop-zone" id="dropZone">
+      <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #ff6b35;"></i>
+      <h6>Drag & Drop Log File Here</h6>
+      <p class="text-muted mb-3">or click to browse</p>
+      <input type="file" id="fileInput" accept=".log,.txt" style="display: none;">
+      <button class="btn btn-soft-primary" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-folder-open me-2"></i>Browse Files
+      </button>
+    </div>
+    <div id="fileInfo" class="mt-3" style="display: none;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <strong id="fileName"></strong>
+          <small class="text-muted ms-2" id="fileSize"></small>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearFile()">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Controls -->
+  <div class="log-entry">
+    <h5 class="fw-bold mb-3"><i class="fas fa-cogs me-2" style="color: #ff6b35;"></i>Analysis Configuration</h5>
+    <form id="analysisForm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Log Type</label>
+          <select class="form-select" id="logType">
+            <option value="apache">Apache Access Log</option>
+            <option value="nginx">Nginx Access Log</option>
+            <option value="system">System Log (syslog)</option>
+            <option value="auth">Authentication Log</option>
+            <option value="firewall">Firewall Log</option>
+            <option value="custom">Custom Format</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Analysis Focus</label>
+          <select class="form-select" id="analysisFocus">
+            <option value="security">Security Events</option>
+            <option value="errors">Error Analysis</option>
+            <option value="performance">Performance Issues</option>
+            <option value="traffic">Traffic Analysis</option>
+            <option value="comprehensive">Comprehensive Analysis</option>
+          </select>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label fw-semibold">Custom Pattern (Optional)</label>
+          <input type="text" class="form-control" id="customPattern" placeholder="Enter regex pattern to search for...">
+          <small class="text-muted">e.g., \b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b for IP addresses</small>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-soft-primary" disabled id="analyzeBtn">
+            <i class="fas fa-search me-2"></i>Analyze Log
+          </button>
+          <button type="button" class="btn btn-outline-secondary ms-2" onclick="loadSampleData()">
+            <i class="fas fa-database me-2"></i>Load Sample Data
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results Section -->
+  <div id="resultsSection" style="display: none;">
+    <!-- Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="metric-number text-primary" id="totalLines">0</div>
+        <div class="small fw-semibold">Total Lines</div>
+      </div>
+      <div class="stat-card">
+        <div class="metric-number text-danger" id="securityEvents">0</div>
+        <div class="small fw-semibold">Security Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="metric-number text-warning" id="errors">0</div>
+        <div class="small fw-semibold">Errors</div>
+      </div>
+      <div class="stat-card">
+        <div class="metric-number text-info" id="uniqueIPs">0</div>
+        <div class="small fw-semibold">Unique IPs</div>
+      </div>
+    </div>
+
+    <!-- Pattern Matches -->
+    <div class="log-entry">
+      <h5 class="fw-bold mb-3"><i class="fas fa-search me-2" style="color: #ff6b35;"></i>Pattern Matches</h5>
+      <div id="patternMatches">
+        <!-- Pattern matches will be populated here -->
+      </div>
+    </div>
+
+    <!-- Security Events -->
+    <div class="log-entry">
+      <h5 class="fw-bold mb-3"><i class="fas fa-shield-alt me-2" style="color: #ff6b35;"></i>Security Events</h5>
+      <div id="securityEventsList">
+        <!-- Security events will be populated here -->
+      </div>
+    </div>
+
+    <!-- Log Preview -->
+    <div class="log-entry">
+      <h5 class="fw-bold mb-3"><i class="fas fa-eye me-2" style="color: #ff6b35;"></i>Log Preview (First 100 lines)</h5>
+      <div id="logPreview" class="log-preview">
+        <!-- Log preview will be shown here -->
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container text-center">
+    <p class="mb-0 text-muted">&copy; 2026 Olaleye — SecOps Engineer. Real security tools with actual functionality.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+<script>
+  class LogAnalyzer {
+    constructor() {
+      this.fileContent = null;
+      this.fileName = null;
+      this.init();
+    }
+
+    init() {
+      this.setupEventListeners();
+      this.initThemeSync();
+    }
+
+    setupEventListeners() {
+      const dropZone = document.getElementById('dropZone');
+      const fileInput = document.getElementById('fileInput');
+      const form = document.getElementById('analysisForm');
+
+      // File drop events
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        this.handleFileSelect(e.dataTransfer.files[0]);
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        this.handleFileSelect(e.target.files[0]);
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.analyzeLog();
+      });
+    }
+
+    initThemeSync() {
+      const observer = new MutationObserver(() => {
+        // Theme change handling
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    handleFileSelect(file) {
+      if (!file) return;
+
+      const validTypes = ['text/plain', 'application/octet-stream'];
+      if (!validTypes.includes(file.type) && !file.name.endsWith('.log')) {
+        this.showNotification('Please select a valid log file (.log, .txt)', 'error');
+        return;
+      }
+
+      this.fileName = file.name;
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        this.fileContent = e.target.result;
+        this.displayFileInfo(file);
+        document.getElementById('analyzeBtn').disabled = false;
+      };
+
+      reader.onerror = () => {
+        this.showNotification('Error reading file', 'error');
+      };
+
+      reader.readAsText(file);
+    }
+
+    displayFileInfo(file) {
+      document.getElementById('fileInfo').style.display = 'block';
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = `(${this.formatFileSize(file.size)})`;
+    }
+
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async analyzeLog() {
+      if (!this.fileContent) {
+        this.showNotification('Please select a log file first', 'error');
+        return;
+      }
+
+      const logType = document.getElementById('logType').value;
+      const analysisFocus = document.getElementById('analysisFocus').value;
+      const customPattern = document.getElementById('customPattern').value;
+
+      try {
+        // Call backend API
+        const response = await fetch('/api/analyze-log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: this.fileContent,
+            fileName: this.fileName,
+            logType,
+            analysisFocus,
+            customPattern
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const results = await response.json();
+        this.displayResults(results);
+
+      } catch (error) {
+        console.error('Analysis error:', error);
+        this.showNotification('Analysis failed: ' + error.message, 'error');
+        this.performLocalAnalysis(); // Fallback to local analysis
+      }
+    }
+
+    performLocalAnalysis() {
+      // Fallback local analysis when backend is not available
+      const lines = this.fileContent.split('\n');
+      const results = {
+        summary: {
+          totalLines: lines.length,
+          securityEvents: this.countSecurityEvents(lines),
+          errors: this.countErrors(lines),
+          uniqueIPs: this.extractUniqueIPs(lines).length
+        },
+        patternMatches: this.findPatternMatches(lines),
+        securityEvents: this.extractSecurityEvents(lines),
+        preview: lines.slice(0, 100).join('\n')
+      };
+
+      this.displayResults(results);
+      this.showNotification('Displaying local analysis results', 'info');
+    }
+
+    countSecurityEvents(lines) {
+      const securityKeywords = ['failed', 'denied', 'attack', 'intrusion', 'breach', 'unauthorized', 'malicious', 'suspicious'];
+      return lines.filter(line => 
+        securityKeywords.some(keyword => 
+          line.toLowerCase().includes(keyword)
+        )
+      ).length;
+    }
+
+    countErrors(lines) {
+      const errorKeywords = ['error', 'failed', 'exception', 'critical', 'fatal'];
+      return lines.filter(line => 
+        errorKeywords.some(keyword => 
+          line.toLowerCase().includes(keyword)
+        )
+      ).length;
+    }
+
+    extractUniqueIPs(lines) {
+      const ipPattern = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g;
+      const ips = new Set();
+      
+      lines.forEach(line => {
+        const matches = line.match(ipPattern);
+        if (matches) {
+          matches.forEach(ip => ips.add(ip));
+        }
+      });
+      
+      return Array.from(ips);
+    }
+
+    findPatternMatches(lines) {
+      const logType = document.getElementById('logType').value;
+      const patterns = this.getPatternsForLogType(logType);
+      const matches = [];
+
+      patterns.forEach(pattern => {
+        const regex = new RegExp(pattern.regex, 'gi');
+        lines.forEach((line, index) => {
+          const match = line.match(regex);
+          if (match) {
+            matches.push({
+              pattern: pattern.name,
+              line: index + 1,
+              match: match[0],
+              context: line.substring(0, 100) + (line.length > 100 ? '...' : '')
+            });
+          }
+        });
+      });
+
+      return matches.slice(0, 50); // Limit to 50 matches
+    }
+
+    getPatternsForLogType(logType) {
+      const patterns = {
+        apache: [
+          { name: 'HTTP Status Codes', regex: '\s(4[0-9]{2}|5[0-9]{2})\s' },
+          { name: 'IP Addresses', regex: '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b' },
+          { name: 'HTTP Methods', regex: '"(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)' }
+        ],
+        nginx: [
+          { name: 'HTTP Status Codes', regex: '\s(4[0-9]{2}|5[0-9]{2})\s' },
+          { name: 'Response Time', regex: '\s[0-9]+\.[0-9]+\s' },
+          { name: 'User Agents', regex: '"[^"]*"$' }
+        ],
+        system: [
+          { name: 'Process IDs', regex: '\[(\d+)\]' },
+          { name: 'Timestamps', regex: '\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}' },
+          { name: 'Error Levels', regex: '(ERROR|WARN|INFO|DEBUG)' }
+        ],
+        auth: [
+          { name: 'Failed Logins', regex: '(failed|invalid|denied)' },
+          { name: 'User Names', regex': 'user\s+(\w+)' },
+          { name: 'Authentication Methods', regex: '(ssh|password|key|auth)' }
+        ],
+        firewall: [
+          { name: 'Blocked Connections', regex: '(blocked|denied|dropped)' },
+          { name: 'Port Numbers', regex: 'port\s+(\d+)' },
+          { name: 'Protocol Types', regex: '(TCP|UDP|ICMP)' }
+        ]
+      };
+
+      return patterns[logType] || patterns.system;
+    }
+
+    extractSecurityEvents(lines) {
+      const securityEvents = [];
+      const securityPatterns = [
+        { pattern: /(failed|denied|unauthorized)/gi, severity: 'high', type: 'Access Denied' },
+        { pattern: /(attack|intrusion|breach)/gi, severity: 'critical', type: 'Security Attack' },
+        { pattern: /(malicious|suspicious)/gi, severity: 'medium', type: 'Suspicious Activity' },
+        { pattern: /(error|exception|critical)/gi, severity: 'medium', type: 'System Error' }
+      ];
+
+      lines.forEach((line, index) => {
+        securityPatterns.forEach(secPattern => {
+          if (secPattern.pattern.test(line)) {
+            securityEvents.push({
+              line: index + 1,
+              severity: secPattern.severity,
+              type: secPattern.type,
+              description: line.substring(0, 150) + (line.length > 150 ? '...' : ''),
+              timestamp: this.extractTimestamp(line)
+            });
+          }
+        });
+      });
+
+      return securityEvents.slice(0, 20); // Limit to 20 events
+    }
+
+    extractTimestamp(line) {
+      const timestampPatterns = [
+        /\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/,
+        /\d{2}\/\w{3}\/\d{4}:\d{2}:\d{2}:\d{2}/,
+        /\w{3}\s\d{1,2}\s\d{2}:\d{2}:\d{2}/
+      ];
+
+      for (const pattern of timestampPatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          return match[0];
+        }
+      }
+
+      return 'Unknown';
+    }
+
+    displayResults(results) {
+      document.getElementById('resultsSection').style.display = 'block';
+
+      // Update statistics
+      document.getElementById('totalLines').textContent = results.summary.totalLines.toLocaleString();
+      document.getElementById('securityEvents').textContent = results.summary.securityEvents.toLocaleString();
+      document.getElementById('errors').textContent = results.summary.errors.toLocaleString();
+      document.getElementById('uniqueIPs').textContent = results.summary.uniqueIPs.toLocaleString();
+
+      // Display pattern matches
+      this.displayPatternMatches(results.patternMatches);
+
+      // Display security events
+      this.displaySecurityEvents(results.securityEvents);
+
+      // Display log preview
+      document.getElementById('logPreview').textContent = results.preview || 'No preview available';
+    }
+
+    displayPatternMatches(matches) {
+      const matchesDiv = document.getElementById('patternMatches');
+      
+      if (!matches || matches.length === 0) {
+        matchesDiv.innerHTML = '<p class="text-muted">No pattern matches found.</p>';
+        return;
+      }
+
+      matchesDiv.innerHTML = matches.slice(0, 10).map(match => `
+        <div class="pattern-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="fw-bold">${match.pattern}</h6>
+              <p class="mb-1">Line ${match.line}: ${match.context}</p>
+              <small class="text-muted">Match: <span class="pattern-match">${match.match}</span></small>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      if (matches.length > 10) {
+        matchesDiv.innerHTML += `<p class="text-muted mt-2">... and ${matches.length - 10} more matches</p>`;
+      }
+    }
+
+    displaySecurityEvents(events) {
+      const eventsDiv = document.getElementById('securityEventsList');
+      
+      if (!events || events.length === 0) {
+        eventsDiv.innerHTML = '<p class="text-muted">No security events detected.</p>';
+        return;
+      }
+
+      eventsDiv.innerHTML = events.map(event => `
+        <div class="log-entry severity-${event.severity}">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="fw-bold">${event.type}</h6>
+              <p class="mb-1">${event.description}</p>
+              <small class="text-muted">Line ${event.line} | ${event.timestamp}</small>
+            </div>
+            <span class="port-status severity-${event.severity}">${event.severity.toUpperCase()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed top-0 end-0 m-3`;
+      notification.style.zIndex = '9999';
+      notification.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>${message}`;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  }
+
+  function clearFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = true;
+    document.getElementById('resultsSection').style.display = 'none';
+    
+    if (window.logAnalyzer) {
+      window.logAnalyzer.fileContent = null;
+      window.logAnalyzer.fileName = null;
+    }
+  }
+
+  function loadSampleData() {
+    const sampleLog = `192.168.1.100 - - [12/May/2026:21:40:00 +0000] "GET /index.html HTTP/1.1" 200 1234
+192.168.1.101 - - [12/May/2026:21:40:01 +0000] "POST /login HTTP/1.1" 401 567
+192.168.1.102 - - [12/May/2026:21:40:02 +0000] "GET /admin HTTP/1.1" 403 890
+192.168.1.103 - - [12/May/2026:21:40:03 +0000] "GET /api/data HTTP/1.1" 500 123
+192.168.1.104 - - [12/May/2026:21:40:04 +0000] "POST /upload HTTP/1.1" 413 456
+192.168.1.105 - - [12/May/2026:21:40:05 +0000] "GET /search HTTP/1.1" 200 789
+192.168.1.106 - - [12/May/2026:21:40:06 +0000] "DELETE /user/123 HTTP/1.1" 204 0
+192.168.1.107 - - [12/May/2026:21:40:07 +0000] "GET /backup HTTP/1.1" 401 234
+192.168.1.108 - - [12/May/2026:21:40:08 +0000] "PUT /config HTTP/1.1" 403 567
+192.168.1.109 - - [12/May/2026:21:40:09 +0000] "GET /health HTTP/1.1" 200 89
+ERROR: Failed authentication for user admin from 192.168.1.200
+WARNING: Suspicious activity detected from IP 192.168.1.201
+CRITICAL: Database connection failed
+INFO: System backup completed successfully
+ERROR: Permission denied for user guest on /etc/shadow
+WARNING: Rate limit exceeded for IP 192.168.1.202`;
+
+    document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('fileName').textContent = 'sample.log';
+    document.getElementById('fileSize').textContent = '(2.5 KB)';
+    document.getElementById('analyzeBtn').disabled = false;
+
+    if (window.logAnalyzer) {
+      window.logAnalyzer.fileContent = sampleLog;
+      window.logAnalyzer.fileName = 'sample.log';
+    }
+  }
+
+  // Theme management
+  function initTheme() {
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('secops_theme', 'dark');
+        darkBtn?.classList.add('active');
+        lightBtn?.classList.remove('active');
+      } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('secops_theme', 'light');
+        lightBtn?.classList.add('active');
+        darkBtn?.classList.remove('active');
+      }
+    };
+
+    const savedTheme = localStorage.getItem('secops_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+
+    const lightBtn = document.getElementById('lightModeBtn');
+    const darkBtn = document.getElementById('darkModeBtn');
+    if (lightBtn) lightBtn.addEventListener('click', () => setTheme('light'));
+    if (darkBtn) darkBtn.addEventListener('click', () => setTheme('dark'));
+  }
+
+  // Initialize everything
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    window.logAnalyzer = new LogAnalyzer();
+  });
+</script>
+</body>
+</html>
